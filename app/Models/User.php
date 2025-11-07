@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,24 +9,35 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
+     * 🔹 Tabel yang digunakan oleh model
+     */
+    protected $table = 'user';
+
+    /**
+     * 🔹 Primary key (karena bukan 'id')
+     */
+    protected $primaryKey = 'id_user';
+
+    /**
+     * 🔹 Nonaktifkan timestamps karena tabel tidak punya created_at & updated_at
+     */
+    public $timestamps = false;
+
+    /**
+     * 🔹 Kolom yang bisa diisi
      */
     protected $fillable = [
-        'name',
-        'email',
+        'username',
         'password',
+        'role',
+        'nama',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
+     * 🔹 Kolom yang disembunyikan dari serialisasi
      */
     protected $hidden = [
         'password',
@@ -35,15 +45,20 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * 🔹 Tidak ada casting tambahan selain password hash
      */
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * 🔹 Relasi: satu user bisa punya banyak kelas (jika admin / wali)
+     */
+    public function kelas()
+    {
+        return $this->hasMany(Kelas::class, 'id_user', 'id_user');
     }
 }

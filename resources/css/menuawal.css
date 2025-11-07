@@ -1,0 +1,52 @@
+body {
+    background-color: #f0f0f0;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.menu-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.menu-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 50px 60px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    text-align: center;
+    width: 600px;
+}
+
+.menu-card h2 {
+    font-weight: 600;
+    margin-bottom: 40px;
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.form-select {
+    border-radius: 8px;
+    height: 45px;
+    box-shadow: 0 0 3px rgba(0,0,0,0.1);
+}
+
+.btn-ok {
+    background-color: #3957ff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 12px 0;
+    width: 100%;
+    margin-top: 30px;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-ok:hover {
+    background-color: #2d46d6;
+}
