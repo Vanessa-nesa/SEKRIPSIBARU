@@ -15,7 +15,7 @@
     <div class="container-fluid d-flex align-items-center">
       <!-- Judul Panel -->
       <div class="d-flex align-items-center">
-        <a class="navbar-brand fw-bold" href="#">Import Data Siswa Panel</a>
+        <a class="navbar-brand fw-bold" href="#">Import Data Siswa Panel tes</a>
         <span>| {{ session('nama') ?? 'Admin' }}</span>
       </div>
 
