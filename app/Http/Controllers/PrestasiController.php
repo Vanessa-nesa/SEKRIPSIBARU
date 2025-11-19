@@ -234,4 +234,19 @@ class PrestasiController extends Controller
 
         return redirect()->route('prestasi.rekap')->with('success', 'Data prestasi berhasil dihapus!');
     }
+    public function destroyKategori($id)
+{
+    $kategori = KategoriPrestasi::findOrFail($id);
+
+    // Hapus semua jenis prestasi yang terkait kategori ini
+    JenisPrestasi::where('id_kategoriprestasi', $id)->delete();
+
+    // Hapus kategori
+    $kategori->delete();
+
+    return back()->with('success', 'Kategori prestasi berhasil dihapus!');
 }
+
+
+}
+

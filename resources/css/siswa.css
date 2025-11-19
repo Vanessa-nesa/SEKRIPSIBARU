@@ -1,39 +1,128 @@
+/* 🌸 Dasar Halaman */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  font-family: 'Poppins', sans-serif;
+  color: #212529;
 }
 
+/* 🌸 Navbar */
 .navbar {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  padding: 12px 30px;
 }
 
+.navbar-brand {
+  font-weight: 700;
+  color: #fff !important;
+  letter-spacing: 0.3px;
+  font-size: 1.1rem;
+}
+
+.navbar .navbar-brand + span {
+  font-weight: 500 !important;
+  color: #cccccc !important;
+  font-size: 0.95rem !important;
+  margin-left: 3px !important;
+  position: relative !important;
+  top: 1px !important;
+  display: inline-block !important;
+}
+
+.navbar .d-flex.align-items-center {
+  display: inline-flex !important;
+  gap: 0 !important;
+}
+
+.navbar .btn-outline-light {
+  border-color: #adb5bd;
+  color: #f8f9fa;
+  transition: 0.25s;
+}
+
+.navbar .btn-outline-light:hover {
+  background-color: #0d6efd;
+  color: #fff;
+}
+
+/* 🌸 Tabel Data */
+.table th {
+  background-color: #dbeafe;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.table tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* 🌸 Card & Form */
 .card {
   border-radius: 10px;
-  overflow: hidden;
 }
 
-.card-body {
-  padding: 2rem;
+/* 🌸 Header Card - Warna Abu Muda */
+.card-header {
+  font-weight: 600;
+  background-color: #e9ecef !important; /* abu muda lembut */
+  color: #212529 !important;            /* teks gelap */
+  border-bottom: 1px solid #d6d8db !important;
 }
 
-.table {
-  margin-top: 1rem;
-  border: 1px solid #dee2e6;
+.form-select, .form-control {
+  border-radius: 8px;
 }
 
-.table th {
+.btn-primary {
   background-color: #0d6efd;
-  color: white;
-}
-
-.alert {
-  font-weight: bold;
-}
-
-.btn-success {
-  background-color: #28a745;
   border: none;
+  border-radius: 8px;
+  font-weight: 600;
 }
 
-.btn-success:hover {
-  background-color: #218838;
+.btn-primary:hover {
+  background-color: #0b5ed7;
+}
+
+.btn-warning, .btn-danger {
+  font-weight: 500;
+}
+
+/* 🌸 Animasi Halus */
+.card, table, form {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.btn-kembali {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(90deg, #000000, #2d2d2d);
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 10px 20px;
+  text-decoration: none;
+  border: 2px solid #000;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.25s ease-in-out;
+  margin-top: 25px;   /* jarak dari navbar */
+  margin-left: 40px;  /* geser ke kanan */
+}
+
+.btn-kembali:hover {
+  background: linear-gradient(90deg, #1a1a1a, #3a3a3a);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.btn-kembali i {
+  font-size: 1.2rem;
 }

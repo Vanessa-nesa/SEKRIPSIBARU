@@ -11,31 +11,24 @@ class Bimbingan extends Model
 
     protected $table = 'bimbingan';
     protected $primaryKey = 'id_bimbingan';
-    public $timestamps = true; // karena ada created_at dan updated_at
 
     protected $fillable = [
         'NIS',
         'id_user',
         'tanggal',
-        'kehadiran',
-        'pelanggaran',
-        'bimbingan_ke', // diganti dari 'bimbingan-ke' biar sesuai standar nama kolom
-        'notes',
         'tahunAjar',
+        'bimbingan_ke',
+        'notes',
     ];
 
-    /**
-     * Relasi ke tabel siswa
-     */
+    // Relasi ke siswa
     public function siswa()
     {
         return $this->belongsTo(Siswa::class, 'NIS', 'NIS');
     }
 
-    /**
-     * Relasi ke tabel pengguna (guru BK)
-     */
-    public function guruBK()
+    // Relasi ke user / guru BK
+    public function user()
     {
         return $this->belongsTo(User::class, 'id_user', 'id');
     }

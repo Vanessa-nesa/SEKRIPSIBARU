@@ -15,7 +15,7 @@
 <!-- 🔹 Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow-sm">
   <div class="container-fluid px-4">
-    <a class="navbar-brand fw-bold" href="#">🏅 Prestasi Siswa</a>
+    <a class="navbar-brand fw-bold" href="#">Prestasi Siswa</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
       aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -35,10 +35,18 @@
   </div>
 </nav>
 
+<!-- 🔙 Tombol Kembali ke Menu Wali Kelas -->
+<div class="container mt-5 mb-4" style="margin-top: 90px !important;">
+    <a href="{{ route('kebutuhanwalikelas') }}" 
+   class="btn btn-dark btn-kembali shadow-sm d-inline-flex align-items-center">
+  <i class="bi bi-arrow-left-circle me-2"></i> Kembali ke Menu Wali Kelas
+</a>
+</div>
+
 <!-- 🔹 Konten -->
 <div class="container py-5 mt-5">
   <div class="card shadow-sm p-4 bg-white">
-    <h3 class="text-center mb-4 fw-bold">📊 Rekap Prestasi Siswa</h3>
+    <h3 class="text-center mb-4 fw-bold">Rekap Prestasi Siswa</h3>
 
     <!-- 🔹 Form Filter -->
     <form method="GET" action="{{ route('prestasi.rekap') }}" class="row g-3 justify-content-center mb-4">

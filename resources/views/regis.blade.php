@@ -43,10 +43,6 @@
                 </div>
 
                 <div class="mb-3">
-                    <input type="text" name="nim" class="form-control" placeholder="NIM" value="{{ old('nim') }}" required>
-                </div>
-
-                <div class="mb-3">
                     <input type="text" name="username" class="form-control" placeholder="Username" value="{{ old('username') }}" required>
                 </div>
 
@@ -65,7 +61,6 @@
                         <option value="Guru BK">Guru BK</option>
                         <option value="Wali Kelas">Wali Kelas</option>
                         <option value="Kepala Sekolah & Wakil Kepala Sekolah">Kepala Sekolah & Wakil Kepala Sekolah</option>
-                        <option value="Admin">Admin</option>
                     </select>
                 </div>
 

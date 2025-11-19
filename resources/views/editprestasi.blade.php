@@ -27,7 +27,7 @@
   <!-- 🔹 Navbar -->
   <nav class="navbar navbar-dark bg-dark shadow-sm">
     <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
-      <a class="navbar-brand fw-bold" href="#">🏅 Prestasi Siswa</a>
+      <a class="navbar-brand fw-bold" href="#">Prestasi Siswa</a>
       <a href="#" class="btn btn-outline-light btn-sm">Logout</a>
     </div>
   </nav>

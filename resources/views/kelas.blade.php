@@ -8,6 +8,17 @@
     body { background-color: #f8f9fa; }
     .navbar-brand { font-weight: bold; }
     .table th, .table td { vertical-align: middle !important; }
+        .btn-kembali {
+    background-color: #343a40;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+.btn-kembali:hover {
+    background-color: #23272b;
+    color: #fff;
+}
   </style>
 </head>
 
@@ -24,9 +35,17 @@
     </div>
   </nav>
 
+  <!-- 🔙 Tombol Kembali ke Menu Wali Kelas -->
+<div class="container mt-5 mb-4" style="margin-top: 90px !important;">
+    <a href="{{ route('kebutuhanwalikelas') }}" 
+       class="btn btn-kembali shadow-sm d-inline-flex align-items-center">
+      <i class="bi bi-arrow-left-circle me-2"></i> Kembali ke Menu Wali Kelas
+    </a>
+</div>
+
   <!-- 🔹 Konten Utama -->
   <div class="container py-5">
-    <h2 class="text-center mb-4">📚 Daftar Kelas</h2>
+    <h2 class="text-center mb-4">Daftar Kelas</h2>
 
     {{-- 🔸 Pesan sukses/error --}}
     @if(session('success'))

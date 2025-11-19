@@ -13,209 +13,226 @@ use Illuminate\Support\Facades\DB;
 
 class BimbinganController extends Controller
 {
-    public function index(Request $request)
-    {
-        $kelas = $request->get('kelas');
-        $jurusan = $request->get('jurusan');
-        $tahunAjar = $request->get('tahunAjar');
-        $tanggal = $request->get('tanggal', Carbon::now()->toDateString());
-        $mode = $request->get('mode', 'bimbingan');
-        $tanggal_riwayat = $request->get('tanggal_riwayat');
+public function index(Request $request)
+{
+    $kelas = $request->kelas;
+    $jurusan = $request->jurusan;
+    $tahunAjar = $request->tahunAjar;
+    $tanggal = $request->tanggal;
+    $mode = $request->mode ?? 'bimbingan';
+    $tanggal_riwayat = $request->tanggal_riwayat;
+    $tanggal_pelanggaran = $request->tanggal_pelanggaran;
 
-        // Ambil daftar kelas dan tahun ajar untuk dropdown
-        $daftar_kelas = Kelas::orderBy('nama_kelas', 'asc')->get();
-        $daftar_tahunAjar = Kelas::select('tahunAjar')->distinct()->orderBy('tahunAjar', 'desc')->pluck('tahunAjar');
+    // Dropdown
+    $daftar_kelas = Kelas::select('nama_kelas')->distinct()->orderBy('nama_kelas')->get();
+    $daftar_jurusan = ['IPA','IPS'];
+    $daftar_tahunAjar = Kelas::select('tahunAjar')->distinct()->orderBy('tahunAjar','desc')->pluck('tahunAjar');
 
-        // Inisialisasi variabel kosong untuk mencegah undefined
-        $siswa = collect();
-        $bimbingan = collect();
-        $absensi = collect();
-        $rekap = collect();
-        $rekapBimbingan = collect();
-        $riwayat = collect();
-
-        // Ambil daftar tanggal unik bimbingan
-        $daftar_tanggal = Bimbingan::select('tanggal')
-            ->distinct()
-            ->orderByDesc('tanggal')
-            ->pluck('tanggal');
-
-        // ======================================================
-        // 📊 MODE REKAP ABSENSI BK
-        // ======================================================
-        if ($mode === 'rekapbk') {
-            if ($kelas && $jurusan && $tahunAjar) {
-                $rekap = Absensi::join('siswa', 'absensi.NIS', '=', 'siswa.NIS')
-                    ->select(
-                        'absensi.tanggal',
-                        'siswa.kelas_siswa as kelas',
-                        'siswa.jurusan_siswa as jurusan',
-                        'absensi.tahunAjar'
-                    )
-                    ->selectRaw('
-                        COUNT(*) as total,
-                        SUM(CASE WHEN status = "Hadir" THEN 1 ELSE 0 END) as hadir,
-                        SUM(CASE WHEN status = "Sakit" THEN 1 ELSE 0 END) as sakit,
-                        SUM(CASE WHEN status = "Izin" THEN 1 ELSE 0 END) as izin,
-                        SUM(CASE WHEN status = "Alpha" THEN 1 ELSE 0 END) as alpha
-                    ')
-                    ->where('siswa.kelas_siswa', $kelas)
-                    ->where('siswa.jurusan_siswa', $jurusan)
-                    ->where('absensi.tahunAjar', $tahunAjar)
-                    ->groupBy('absensi.tanggal', 'siswa.kelas_siswa', 'siswa.jurusan_siswa', 'absensi.tahunAjar')
-                    ->orderByDesc('absensi.tanggal')
-                    ->get();
-            }
-        }
-
-        // ======================================================
-        // 📋 MODE REKAP BIMBINGAN (tanpa tanggal)
-        // ======================================================
-        elseif ($mode === 'rekapbimbingan' && $kelas && $jurusan && !$tanggal_riwayat) {
-            $rekapBimbingan = DB::table('bimbingan')
-                ->join('siswa', 'bimbingan.NIS', '=', 'siswa.NIS')
-                ->select(
-                    'bimbingan.tanggal',
-                    'siswa.kelas_siswa as kelas',
-                    'siswa.jurusan_siswa as jurusan',
-                    DB::raw('COUNT(DISTINCT bimbingan.NIS) as total_siswa'),
-                    DB::raw('COUNT(bimbingan.id_bimbingan) as total_bimbingan'),
-                    DB::raw('GROUP_CONCAT(DISTINCT bimbingan.pelanggaran SEPARATOR ", ") as pelanggaran')
-                )
-                ->where('siswa.kelas_siswa', $kelas)
-                ->where('siswa.jurusan_siswa', $jurusan)
-                ->when($tahunAjar, function ($q) use ($tahunAjar) {
-                    $q->where('bimbingan.tahunAjar', $tahunAjar);
-                })
-                ->groupBy('bimbingan.tanggal', 'siswa.kelas_siswa', 'siswa.jurusan_siswa')
-                ->orderByDesc('bimbingan.tanggal')
-                ->get();
-        }
-
-        // ======================================================
-        // 🗓️ MODE RIWAYAT BIMBINGAN (berdasarkan tanggal)
-        // ======================================================
-        elseif ($mode === 'rekapbimbingan' && $kelas && $jurusan && $tanggal_riwayat) {
-            $riwayat = Bimbingan::with('siswa')
-                ->whereDate('tanggal', $tanggal_riwayat)
-                ->whereHas('siswa', function ($q) use ($kelas, $jurusan) {
-                    $q->where('kelas_siswa', $kelas)
-                      ->where('jurusan_siswa', $jurusan);
-                })
-                ->when($tahunAjar, function ($q) use ($tahunAjar) {
-                    $q->where('tahunAjar', $tahunAjar);
-                })
-                ->orderBy('bimbingan_ke', 'asc')
-                ->get();
-        }
-
-        // ======================================================
-        // ✍️ MODE INPUT BIMBINGAN (default)
-        // ======================================================
-        elseif ($kelas && $jurusan) {
-            $siswa = Siswa::where('kelas_siswa', $kelas)
-                ->where('jurusan_siswa', $jurusan)
-                ->get();
-
-            $absensi = Absensi::whereDate('tanggal', $tanggal)
-                ->whereHas('siswa', function ($q) use ($kelas, $jurusan) {
-                    $q->where('kelas_siswa', $kelas)
-                      ->where('jurusan_siswa', $jurusan);
-                })
-                ->get();
-
-            $bimbingan = Bimbingan::with('siswa')
-                ->whereHas('siswa', function ($q) use ($kelas, $jurusan) {
-                    $q->where('kelas_siswa', $kelas)
-                      ->where('jurusan_siswa', $jurusan);
-                })
-                ->when($tahunAjar, function ($q) use ($tahunAjar) {
-                    $q->where('tahunAjar', $tahunAjar);
-                })
-                ->get();
-        }
-
-        // ======================================================
-        // 🚀 KIRIM DATA KE VIEW UTAMA
-        // ======================================================
-        return view('bimbingan', compact(
-            'kelas',
-            'jurusan',
-            'tahunAjar',
-            'tanggal',
-            'siswa',
-            'bimbingan',
-            'absensi',
-            'rekap',
-            'rekapBimbingan',
-            'riwayat',
-            'daftar_tanggal',
-            'tanggal_riwayat',
-            'mode',
-            'daftar_kelas',
-            'daftar_tahunAjar'
-        ));
+    // =====================
+    // MODE: INPUT BIMBINGAN
+    // =====================
+    $siswa = collect();
+    if ($mode == 'bimbingan' && $kelas && $jurusan && $tahunAjar) {
+        $siswa = Siswa::where('kelas_siswa',$kelas)
+            ->where('jurusan_siswa',$jurusan)
+            ->where('tahunAjar',$tahunAjar)
+            ->orderBy('nama_siswa')
+            ->get();
     }
+
+    // =====================
+    // MODE: REKAP ABSENSI
+    // =====================
+    $rekapAbsensi = collect();
+    if ($mode == 'rekapbk' && $kelas && $jurusan && $tahunAjar) {
+
+        $rekapAbsensi = Absensi::join('siswa','siswa.NIS','=','absensi.NIS')
+            ->select('siswa.nama_siswa','absensi.status','absensi.tanggal')
+            ->where('siswa.kelas_siswa',$kelas)
+            ->where('siswa.jurusan_siswa',$jurusan)
+            ->where('absensi.tahunAjar',$tahunAjar)
+            ->when($tanggal, fn($q)=>$q->whereDate('absensi.tanggal',$tanggal))
+            ->orderBy('absensi.tanggal','desc')
+            ->get();
+    }
+
+    // =====================
+    // MODE: REKAP BIMBINGAN
+    // =====================
+    $riwayat = collect();
+    if ($mode == 'rekapbimbingan' && $kelas && $jurusan && $tahunAjar && $tanggal_riwayat) {
+
+        $riwayat = Bimbingan::join('siswa','siswa.NIS','=','bimbingan.NIS')
+    ->select('bimbingan.*','siswa.nama_siswa','siswa.kelas_siswa','siswa.jurusan_siswa')
+    ->where('siswa.kelas_siswa',$kelas)
+    ->where('siswa.jurusan_siswa',$jurusan)
+    ->where('bimbingan.tahunAjar',$tahunAjar)
+    ->whereDate('bimbingan.tanggal', $tanggal_riwayat)
+    ->orderBy('bimbingan.tanggal','desc')
+
+    ->get();
+
+    }
+
+  // =====================
+// MODE: REKAP PELANGGARAN
+// =====================
+$rekap_pelanggaran = collect();
+if ($mode == 'rekappelanggaran' && $kelas && $jurusan && $tahunAjar) {
+
+$rekap_pelanggaran = DB::table('pelanggaran')
+    ->join('siswa','siswa.NIS','=','pelanggaran.NIS')
+    ->join('jenispelanggaran','jenispelanggaran.id_jenispelanggaran','=','pelanggaran.id_jenispelanggaran')
+    ->select(
+        'pelanggaran.tanggal',
+        'siswa.nama_siswa',
+        'jenispelanggaran.nama_pelanggaran as nama_pelanggaran',
+        'pelanggaran.notes'
+    )
+    ->where('siswa.kelas_siswa',$kelas)
+    ->where('siswa.jurusan_siswa',$jurusan)
+    ->where('pelanggaran.tahunAjar',$tahunAjar)
+    ->when($tanggal_pelanggaran, fn($q)=>$q->whereDate('pelanggaran.tanggal',$tanggal_pelanggaran))
+    ->orderBy('pelanggaran.tanggal','desc')
+    ->get();
+
+
+
+}
+
+
+$rekap = $rekapAbsensi;
+
+return view('bimbingan', compact(
+    'kelas','jurusan','tahunAjar','tanggal','mode',
+    'tanggal_riwayat','tanggal_pelanggaran',
+    'daftar_kelas','daftar_jurusan','daftar_tahunAjar',
+    'siswa','riwayat','rekap','rekap_pelanggaran'
+));
+
+
+}
+
+
 
     // ============================================================
     // 🔸 SIMPAN DATA BIMBINGAN
     // ============================================================
     public function store(Request $request)
-    {
-        $request->validate([
-            'tanggal_bimbingan' => 'required|date',
-            'data' => 'required|array',
-        ]);
+{
+    $request->validate([
+        'tanggal' => 'required|date',
+        'data' => 'required|array',
+    ]);
 
-        $tanggal = $request->tanggal_bimbingan;
-        $tahunAjar = $request->tahunAjar ?? date('Y') . '/' . (date('Y') + 1);
-        $count = 0;
-        $userId = Auth::id() ?? 1;
+    $tanggal = $request->tanggal;
+    $tahunAjar = $request->tahunAjar ?? date('Y') . '/' . (date('Y') + 1);
+    $count = 0;
+    $userId = Auth::id() ?? 1;
 
-        foreach ($request->data as $item) {
-            if (empty($item['pelanggaran']) && empty($item['bimbingan_ke']) && empty($item['notes'])) {
-                continue;
-            }
-
-            $absensi = Absensi::where('NIS', $item['NIS'])
-                ->whereDate('tanggal', $tanggal)
-                ->first();
-
-            $kehadiran = $absensi->status ?? 'Tidak Diketahui';
-
-            Bimbingan::create([
-                'NIS' => $item['NIS'],
-                'id_user' => $userId,
-                'tanggal' => $tanggal,
-                'kehadiran' => $kehadiran,
-                'pelanggaran' => $item['pelanggaran'] ?? '-',
-                'bimbingan_ke' => $item['bimbingan_ke'] ?? null,
-                'notes' => $item['notes'] ?? null,
-                'tahunAjar' => $tahunAjar,
-            ]);
-
-            $count++;
+    foreach ($request->data as $item) {
+        if (empty($item['bimbingan_ke']) && empty($item['notes'])) {
+            continue;
         }
 
-        return back()->with('success', "✅ {$count} data bimbingan berhasil disimpan untuk tahun ajar {$tahunAjar}!");
+        Bimbingan::create([
+            'NIS'           => $item['NIS'],
+            'id_user'       => $userId,
+            'tanggal'       => $tanggal,
+            'tahunAjar'     => $tahunAjar,
+            'bimbingan_ke'  => $item['bimbingan_ke'] ?? null,
+            'notes'         => $item['notes'] ?? null,
+        ]);
+
+        $count++;
     }
 
-    // ============================================================
-    // 🔸 UPDATE DATA BIMBINGAN
-    // ============================================================
-    public function update(Request $request, $id)
-    {
-        $bimbingan = Bimbingan::findOrFail($id);
-        $bimbingan->update($request->only(['kehadiran', 'pelanggaran', 'bimbingan_ke', 'notes']));
-        return back()->with('success', '✅ Data bimbingan berhasil diperbarui!');
-    }
-
-    // ============================================================
-    // 🔸 HAPUS DATA BIMBINGAN
-    // ============================================================
-    public function destroy($id)
-    {
-        Bimbingan::destroy($id);
-        return back()->with('success', '🗑️ Data bimbingan dihapus!');
-    }
+    return back()->with('success', "✓ {$count} data bimbingan berhasil disimpan!");
 }
+
+
+    public function edit($id)
+{
+    $data = Bimbingan::join('siswa','siswa.NIS','=','bimbingan.NIS')
+            ->select('bimbingan.*','siswa.nama_siswa')
+            ->where('id_bimbingan',$id)
+            ->first();
+
+    return view('bimbingan_edit', compact('data'));
+}
+
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'pelanggaran' => 'nullable|string',
+        'bimbingan_ke' => 'nullable|integer',
+        'notes' => 'nullable|string',
+    ]);
+
+    Bimbingan::where('id_bimbingan', $id)->update([
+        'pelanggaran' => $request->pelanggaran,
+        'bimbingan_ke' => $request->bimbingan_ke,
+        'notes'       => $request->notes,
+    ]);
+
+    return redirect()->route('bimbingan', [
+        'mode' => 'rekapbimbingan',
+        'kelas' => $request->kelas,
+        'jurusan' => $request->jurusan,
+        'tahunAjar' => $request->tahunAjar,
+        'tanggal_riwayat' => $request->tanggal
+    ])->with('success','Data bimbingan berhasil diperbarui!');
+}
+
+public function delete($id)
+{
+    Bimbingan::where('id_bimbingan', $id)->delete();
+    return back()->with('success','Data bimbingan berhasil dihapus!');
+}
+
+public function rekap(Request $request)
+{
+    $kelas = $request->kelas;
+    $jurusan = $request->jurusan;
+    $tahunAjar = $request->tahunAjar;
+    $tanggal = $request->tanggal;
+
+    // Dropdown
+    $daftar_kelas = Kelas::select('nama_kelas')->distinct()->orderBy('nama_kelas')->get();
+    $daftar_tahunAjar = Kelas::select('tahunAjar')->distinct()->orderBy('tahunAjar','desc')->pluck('tahunAjar');
+
+    // Ambil data bimbingan berdasarkan filter
+    $bimbingan = collect();
+
+    if ($kelas && $jurusan && $tahunAjar && $tanggal) {
+        $bimbingan = Bimbingan::join('siswa', 'siswa.NIS', '=', 'bimbingan.NIS')
+            ->select('bimbingan.*', 'siswa.nama_siswa', 'siswa.kelas_siswa', 'siswa.jurusan_siswa')
+            ->where('siswa.kelas_siswa', $kelas)
+            ->where('siswa.jurusan_siswa', $jurusan)
+            ->where('bimbingan.tahunAjar', $tahunAjar)
+            ->whereDate('bimbingan.tanggal_bimbingan', $tanggal)
+            ->orderBy('bimbingan.tanggal_bimbingan', 'desc')
+            ->get();
+    }
+
+    // Ambil absensi hari itu
+    $absensi = Absensi::whereDate('tanggal', $tanggal)->get();
+
+    // Ambil pelanggaran hari itu
+    $pelanggaran = DB::table('pelanggaran')->whereDate('tanggal', $tanggal)->get();
+
+    return view('bimbingan', compact(
+        'kelas',
+        'jurusan',
+        'tahunAjar',
+        'tanggal',
+        'daftar_kelas',
+        'daftar_tahunAjar',
+        'bimbingan',
+        'absensi',
+        'pelanggaran'
+    ));
+}
+
+
+} 

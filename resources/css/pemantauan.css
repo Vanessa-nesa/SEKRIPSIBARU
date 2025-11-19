@@ -1,0 +1,80 @@
+/* ===========================
+   GLOBAL
+=========================== */
+body { 
+    background-color: #f8f9fa; 
+    font-family: 'Poppins', sans-serif; 
+}
+
+.section-title {
+    border-radius: 6px 6px 0 0;
+    padding: 14px 18px;       /* lebih besar */
+    color: white;
+    font-weight: 600;
+    font-size: 17px;          /* teks lebih jelas */
+    letter-spacing: 0.3px;
+}
+
+
+/* Header Rekap */
+.section-title.bg-info {
+    background: #00b9ff !important;
+}
+
+/* ===========================
+   TABEL BIMBINGAN
+=========================== */
+.table-bimbingan thead {
+    background-color: #d6f5ff;
+    font-weight: 600;
+    text-align: center;
+}
+
+.table-bimbingan tbody tr:nth-child(even) {
+    background-color: #f7fbfc;
+}
+
+.table-bimbingan tbody tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+.table-bimbingan td {
+    padding: 10px 12px;
+    font-size: 14px;
+}
+
+.table-bimbingan th {
+    padding: 12px;
+    font-size: 15px;
+}
+
+/* ===========================
+   TABEL ABSENSI
+=========================== */
+.table-absensi thead {
+    background-color: #e9f4ff !important;
+    color: #000;
+}
+
+.table-absensi tbody tr:nth-child(even) {
+    background-color: #f4faff !important;
+}
+
+.table-absensi tbody tr:nth-child(odd) {
+    background-color: #ffffff !important;
+}
+
+.table-absensi td, 
+.table-absensi th {
+    border: 1px solid #d0d0d0 !important;
+    padding: 12px;
+    font-size: 15px;
+}
+
+.table-absensi td {
+    text-align: center;
+}
+
+.table-absensi td:first-child {
+    text-align: left;
+}

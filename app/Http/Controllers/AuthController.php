@@ -40,25 +40,25 @@ class AuthController extends Controller
             // 🔹 Arahkan sesuai role
             switch ($user->role) {
                 case 'Guru BK':
-                    // Sekarang diarahkan ke halaman pilihan menunya
                     return redirect()
                         ->route('kebutuhanbk')
                         ->with('success', 'Selamat datang, Guru BK ' . $user->nama . '!');
 
                 case 'Wali Kelas':
                     return redirect()
-                        ->route('siswa.index')
+                        ->route('kebutuhanwalikelas')
                         ->with('success', 'Selamat datang Wali Kelas ' . $user->nama . '!');
 
                 case 'Kepala Sekolah':
-                case 'Wakil Kepala Sekolah':
-                    return redirect()
-                        ->route('pemantau')
-                        ->with('success', 'Selamat datang ' . $user->role . ' ' . $user->nama . '!');
+    case 'Wakil Kepala Sekolah':
+        return redirect()
+            ->route('pemantauan.index')
+            ->with('success', 'Selamat datang ' . $user->role . ' ' . $user->nama . '!');
+
 
                 default:
                     return redirect()
-                        ->route('dashboard')
+                        ->route('pemantauan.index')
                         ->with('success', 'Login berhasil!');
             }
         }

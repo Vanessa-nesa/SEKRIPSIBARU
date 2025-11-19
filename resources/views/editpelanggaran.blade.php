@@ -7,7 +7,7 @@
 </head>
 <body class="bg-light">
   <div class="container py-5">
-    <h3 class="text-center mb-4">✏️ Edit Pelanggaran Siswa</h3>
+    <h3 class="text-center mb-4">Edit Pelanggaran Siswa</h3>
 
     <form method="POST" action="{{ route('pelanggaran.update', $pelanggaran->id_pelanggaran) }}" class="p-4 bg-white shadow-sm rounded">
       @csrf
@@ -41,7 +41,7 @@
       </div>
 
       <div class="text-center">
-        <button type="submit" class="btn btn-success px-4">💾 Simpan Perubahan</button>
+        <button type="submit" class="btn btn-success px-4">Simpan Perubahan</button>
         <a href="{{ route('pelanggaran.rekap') }}" class="btn btn-secondary px-4">↩️ Kembali</a>
       </div>
     </form>

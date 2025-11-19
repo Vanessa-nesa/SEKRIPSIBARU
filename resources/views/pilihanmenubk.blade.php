@@ -14,7 +14,7 @@
     <!-- 🔹 Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand fw-semibold" href="#">👩‍🏫 Guru BK Panel</a>
+            <a class="navbar-brand fw-semibold" href="#">Guru BK Panel</a>
             <div class="ms-auto">
                 <a href="{{ route('logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
             </div>
@@ -38,12 +38,12 @@
             <div class="row mt-4">
                 <div class="col-md-6 mb-3">
                     <a href="{{ route('bimbingan') }}" class="btn btn-fitur btn-primary w-100 py-3 fw-semibold">
-                        📘 Bimbingan Konseling
+                        Bimbingan Konseling
                     </a>
                 </div>
                 <div class="col-md-6 mb-3">
                     <a href="{{ route('pelanggaran.index') }}" class="btn btn-fitur btn-danger w-100 py-3 fw-semibold">
-                        ⚠️ Pelanggaran Siswa
+                        Pelanggaran Siswa
                     </a>
                 </div>
             </div>

@@ -22,6 +22,17 @@
       border: 1px solid #ccc;
       margin-top: 10px;
     }
+        .btn-kembali {
+    background-color: #343a40;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+.btn-kembali:hover {
+    background-color: #23272b;
+    color: #fff;
+}
   </style>
 </head>
 <body>
@@ -31,7 +42,7 @@
   <div class="container-fluid d-flex justify-content-between align-items-center px-4">
     <!-- Logo kiri -->
     <a class="navbar-brand fw-bold text-light d-flex align-items-center gap-2 mb-0" href="#">
-      🏅 <span>Prestasi Siswa</span>
+      <span>Prestasi Siswa</span>
     </a>
 
     <!-- Menu kanan -->
@@ -61,11 +72,20 @@
 </nav>
 
 
+<!-- 🔙 Tombol Kembali ke Menu Wali Kelas -->
+<div class="container mt-5 mb-4" style="margin-top: 90px !important;">
+    <a href="{{ route('kebutuhanwalikelas') }}" 
+       class="btn btn-kembali shadow-sm d-inline-flex align-items-center">
+      <i class="bi bi-arrow-left-circle me-2"></i> Kembali ke Menu Wali Kelas
+    </a>
+</div>
+
+
 
 <!-- 🔹 Konten Utama -->
 <div class="container py-5 mt-5">
   <div class="card shadow-sm p-4 bg-white">
-    <h3 class="text-center mb-4 fw-bold">📋 Tambah Prestasi Siswa</h3>
+    <h3 class="text-center mb-4 fw-bold">Tambah Prestasi Siswa</h3>
 
     {{-- 🔹 Notifikasi --}}
     @if(session('success'))

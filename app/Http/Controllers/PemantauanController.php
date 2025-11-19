@@ -54,32 +54,44 @@ class PemantauanController extends Controller
             // 📘 DATA ABSENSI
             // ==========================
             $absensi = DB::table('absensi')
-                ->join('siswa', 'absensi.NIS', '=', 'siswa.NIS')
-                ->where('siswa.kelas_siswa', $kelas)
-                ->where('siswa.jurusan_siswa', $jurusan)
-                ->where('absensi.tahunAjar', $tahunAjar)
-                ->select(
-                    'absensi.*',
-                    'siswa.nama_siswa',
-                    'siswa.kelas_siswa',
-                    'siswa.jurusan_siswa'
-                )
-                ->get();
+    ->join('siswa', 'absensi.NIS', '=', 'siswa.NIS')
+    ->where('siswa.kelas_siswa', $kelas)
+    ->where('siswa.jurusan_siswa', $jurusan)
+    ->where('absensi.tahunAjar', $tahunAjar)
+    ->select(
+        'siswa.kelas_siswa',
+        'siswa.jurusan_siswa',
+        DB::raw('COUNT(absensi.id_absensi) as total'),
+        DB::raw('SUM(CASE WHEN absensi.status = "Hadir" THEN 1 ELSE 0 END) as hadir'),
+        DB::raw('SUM(CASE WHEN absensi.status = "Sakit" THEN 1 ELSE 0 END) as sakit'),
+        DB::raw('SUM(CASE WHEN absensi.status = "Izin" THEN 1 ELSE 0 END) as izin'),
+        DB::raw('SUM(CASE WHEN absensi.status = "Alpha" THEN 1 ELSE 0 END) as alpa')
+    )
+    ->groupBy('siswa.kelas_siswa', 'siswa.jurusan_siswa')
+    ->get();
+
+    
+
 
             // ==========================
             // ⚠️ DATA PELANGGARAN
             // ==========================
             $pelanggaran = DB::table('pelanggaran')
-                ->join('siswa', 'pelanggaran.NIS', '=', 'siswa.NIS')
-                ->where('siswa.kelas_siswa', $kelas)
-                ->where('siswa.jurusan_siswa', $jurusan)
-                ->select(
-                    'pelanggaran.*',
-                    'siswa.nama_siswa',
-                    'siswa.kelas_siswa',
-                    'siswa.jurusan_siswa'
+            ->join('siswa', 'pelanggaran.NIS', '=', 'siswa.NIS')
+            ->join('jenispelanggaran', 'pelanggaran.id_jenispelanggaran', '=', 'jenispelanggaran.id_jenispelanggaran')
+            ->where('siswa.kelas_siswa', $kelas)
+            ->where('siswa.jurusan_siswa', $jurusan)
+            ->select(
+                'pelanggaran.*',
+                'siswa.nama_siswa',
+                'siswa.kelas_siswa',
+                'siswa.jurusan_siswa',
+                'jenispelanggaran.nama_pelanggaran as jenis',
+                'jenispelanggaran.deskripsi'
                 )
-                ->get();
+            ->get();
+
+
 
             // ==========================
             // 💬 DATA BIMBINGAN
@@ -128,4 +140,49 @@ class PemantauanController extends Controller
             'namaUser'
         ));
     }
+
+    public function detailAbsensi(Request $request)
+{
+    $kelas = $request->kelas;
+    $jurusan = $request->jurusan;
+    $tahunAjar = $request->tahunAjar;
+
+    // 🔹 Tambahkan filter tanggal
+    $tanggal = $request->tanggal;
+
+    $query = DB::table('absensi')
+        ->join('siswa', 'absensi.NIS', '=', 'siswa.NIS')
+        ->where('siswa.kelas_siswa', $kelas)
+        ->where('siswa.jurusan_siswa', $jurusan)
+        ->where('absensi.tahunAjar', $tahunAjar)
+        ->select(
+            'siswa.nama_siswa',
+            'absensi.status',
+            'absensi.tanggal'
+        );
+
+    // Jika tanggal dipilih → filter per tanggal
+    if ($tanggal) {
+        $query->where('absensi.tanggal', $tanggal);
+    }
+
+    $dataAbsensi = $query->orderBy('siswa.nama_siswa')->get();
+
+    // 🔹 Ambil daftar tanggal absensi yang tersedia
+    $daftarTanggal = DB::table('absensi')
+        ->where('tahunAjar', $tahunAjar)
+        ->distinct()
+        ->orderBy('tanggal')
+        ->pluck('tanggal');
+
+    return view('detailabsensi', compact(
+        'dataAbsensi',
+        'kelas',
+        'jurusan',
+        'tahunAjar',
+        'tanggal',
+        'daftarTanggal'
+    ));
+}
+
 }

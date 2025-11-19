@@ -9,6 +9,18 @@
     body { background-color: #f8f9fa; }
     .table th, .table td { vertical-align: middle; }
     .navbar-brand { font-weight: 600; }
+    .btn-kembali {
+    background-color: #343a40;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+.btn-kembali:hover {
+    background-color: #23272b;
+    color: #fff;
+}
+
   </style>
 </head>
 <body>
@@ -23,22 +35,30 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
-            <a href="{{ route('pelanggaran.rekap') }}" class="nav-link">📊 Rekap Pelanggaran</a>
+            <a href="{{ route('pelanggaran.rekap') }}" class="nav-link">Rekap Pelanggaran</a>
           </li>
           <li class="nav-item">
             <form action="{{ route('logout') }}" method="POST" class="d-inline">
               @csrf
-              <button type="submit" class="btn btn-sm btn-outline-light ms-2">🚪 Logout</button>
+              <button type="submit" class="btn btn-sm btn-outline-light ms-2">Logout</button>
             </form>
           </li>
         </ul>
       </div>
     </div>
   </nav>
+<!-- 🔙 Tombol Kembali ke Menu Guru BK -->
+<div class="container mt-5 mb-4">   <!-- mt-5 = jarak besar dari navbar -->
+    <a href="{{ route('kebutuhanbk') }}" 
+       class="btn btn-kembali shadow-sm d-inline-flex align-items-center">
+      <i class="bi bi-arrow-left-circle me-2"></i> Kembali ke Menu Guru BK
+    </a>
+</div>
 
+</div>
   <!-- 🔹 Konten Utama -->
   <div class="container py-5">
-    <h3 class="text-center mb-4">📋 Input Pelanggaran Siswa</h3>
+    <h3 class="text-center mb-4">Input Pelanggaran Siswa</h3>
 
     {{-- Pesan sukses/error --}}
     @if(session('success'))
@@ -49,7 +69,9 @@
 
     {{-- 🔹 Filter Tahun Ajaran, Kelas & Jurusan --}}
   {{-- 🔹 Filter Kelas, Jurusan, dan Tahun Ajaran --}}
-<form method="GET" action="{{ route('pelanggaran.index') }}" class="row justify-content-center mb-4">
+<form method="GET" action="{{ route('pelanggaran.index') }}" 
+      class="row justify-content-center g-2 mb-4 mt-4 pt-3">
+
   <div class="col-md-3">
     <label class="form-label fw-bold">Kelas</label>
     <select name="kelas" class="form-select" required>
@@ -160,7 +182,7 @@
         </div>
 
         <div class="text-center mt-4">
-          <button type="submit" class="btn btn-success px-4 py-2 fw-semibold">💾 Simpan</button>
+          <button type="submit" class="btn btn-success px-4 py-2 fw-semibold">Simpan</button>
         </div>
       </form>
     @else

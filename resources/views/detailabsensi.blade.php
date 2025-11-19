@@ -2,41 +2,80 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Detail Absensi</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light py-5">
-<div class="container">
-  <h3 class="text-center mb-4">
-    🧾 Detail Absensi {{ $kelas }} {{ $jurusan }} - {{ \Carbon\Carbon::parse($tanggal)->format('d M Y') }}
+<body>
+
+<div class="container mt-4">
+
+  <h3 class="fw-bold mb-3">
+    Detail Absensi – {{ $kelas }} / {{ $jurusan }} ({{ $tahunAjar }})
   </h3>
+  
+<!-- tombol kembali pematauan-->
+  <a href="{{ route('pemantauan.index', [
+    'kelas' => $kelas,
+    'jurusan' => $jurusan,
+    'tahunAjar' => $tahunAjar
+]) }}" class="btn btn-warning mb-3">
+    Kembali
+</a>
 
-  <a href="{{ route('absensi.rekap') }}" class="btn btn-secondary mb-3">⬅️ Kembali ke Rekap</a>
 
-  <table class="table table-bordered text-center align-middle">
+  <!-- 🔹 FILTER TANGGAL -->
+  <form method="GET" action="" class="row g-2 mb-4">
+
+      <input type="hidden" name="kelas" value="{{ $kelas }}">
+      <input type="hidden" name="jurusan" value="{{ $jurusan }}">
+      <input type="hidden" name="tahunAjar" value="{{ $tahunAjar }}">
+
+      <div class="col-md-3">
+        <input type="date" name="tanggal" 
+           class="form-control" 
+           value="{{ request('tanggal') }}"
+           required>
+      </div>
+
+      <div class="col-md-2">
+          <button class="btn btn-primary w-100">Filter</button>
+      </div>
+
+  </form>
+
+  <table class="table table-bordered align-middle">
     <thead class="table-dark">
       <tr>
-        <th>No</th>
         <th>Nama Siswa</th>
         <th>Status</th>
-        <th>Keterangan</th>
+        <th>Tanggal</th>
       </tr>
     </thead>
+
     <tbody>
-      @forelse($detail as $index => $d)
-      <tr class="{{ $d->status === 'Alpa' ? 'table-danger' : ($d->status === 'Sakit' ? 'table-warning' : ($d->status === 'Izin' ? 'table-primary' : '')) }}">
-        <td>{{ $index + 1 }}</td>
-        <td>{{ $d->nama_siswa }}</td>
-        <td>{{ $d->status }}</td>
-        <td>{{ $d->keterangan ?? '-' }}</td>
-      </tr>
-      @empty
+      @foreach($dataAbsensi as $d)
       <tr>
-        <td colspan="4" class="text-center text-muted">Belum ada data absensi.</td>
+        <td>{{ $d->nama_siswa }}</td>
+        <td>
+          @if($d->status == 'Hadir')
+            <span class="text-success fw-bold">Hadir</span>
+          @elseif($d->status == 'Sakit')
+            <span class="text-warning fw-bold">Sakit</span>
+          @elseif($d->status == 'Izin')
+            <span class="text-primary fw-bold">Izin</span>
+          @else
+            <span class="text-danger fw-bold">Alpa</span>
+          @endif
+        </td>
+        <td>{{ $d->tanggal }}</td>
       </tr>
-      @endforelse
+      @endforeach
     </tbody>
   </table>
+
 </div>
+
 </body>
 </html>

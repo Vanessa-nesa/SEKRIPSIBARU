@@ -1,8 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request; 
+use Illuminate\Http\Request;
 
+// 🔹 Import semua controller yang digunakan
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\KelasController;
@@ -13,24 +14,28 @@ use App\Http\Controllers\RekapBimbinganController;
 use App\Http\Controllers\PelanggaranController;
 use App\Http\Controllers\PrestasiController;
 use App\Http\Controllers\PemantauanController;
+use App\Http\Controllers\WaliController; 
 use App\Models\Siswa;
 
-/*
-|--------------------------------------------------------------------------
-| KEBUTUHAN BK
-|--------------------------------------------------------------------------
-*/
-Route::get('/kebutuhanbk', function () {
-    $role = session('role');
-    if (!in_array($role, ['Guru BK', 'Kepala Sekolah', 'Wakil Kepala Sekolah', 'Admin'])) {
-        return redirect()->route('login')->with('error', 'Akses ditolak!');
-    }
-    return view('pilihanmenubk');
-})->name('kebutuhanbk');
+use App\Http\Controllers\GuruBKController;
+
+
+Route::get('/gurubk', [BimbinganController::class, 'index'])->name('bimbingan');
+
+
+
+// Menyimpan data bimbingan (dari form POST)
+Route::post('/gurubk/store', [BimbinganController::class, 'store'])->name('bimbingan.store');
+
+// Guru BK
+// ==========================================================
+// 📘 GURU BK PANEL (semua tab dalam 1 halaman Bimbingan)
+// ==========================================================
+Route::post('/gurubk/store', [BimbinganController::class, 'store'])->name('bimbingan.store');
 
 /*
 |--------------------------------------------------------------------------
-| AUTH ROUTES
+| 🔐 AUTH ROUTES
 |--------------------------------------------------------------------------
 */
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
@@ -41,18 +46,35 @@ Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 /*
 |--------------------------------------------------------------------------
-| KELAS ROUTES
+| 🧩 KEBUTUHAN BK & WALI KELAS
 |--------------------------------------------------------------------------
 */
-Route::get('/kelas', [KelasController::class, 'index'])->name('kelas.index');
-Route::post('/kelas', [KelasController::class, 'store'])->name('kelas.store');
-Route::put('/kelas/{id}', [KelasController::class, 'update'])->name('kelas.update');
-Route::delete('/kelas/{id}', [KelasController::class, 'destroy'])->name('kelas.destroy');
-Route::get('/kelas/{id}/edit', [KelasController::class, 'edit'])->name('kelas.edit');
+Route::get('/kebutuhanbk', function () {
+    $role = session('role');
+    if (!in_array($role, ['Guru BK', 'Kepala Sekolah', 'Wakil Kepala Sekolah', 'Admin'])) {
+        return redirect()->route('login')->with('error', 'Akses ditolak!');
+    }
+    return view('pilihanmenubk');
+})->name('kebutuhanbk');
+
+Route::get('/kebutuhanwalikelas', function () {
+    $role = session('role');
+    if (!in_array($role, ['Wali Kelas', 'Kepala Sekolah', 'Wakil Kepala Sekolah', 'Admin'])) {
+        return redirect()->route('login')->with('error', 'Akses ditolak!');
+    }
+    return view('menuwalikelas');
+})->name('kebutuhanwalikelas');
 
 /*
 |--------------------------------------------------------------------------
-| SISWA ROUTES
+| 🏫 KELAS ROUTES
+|--------------------------------------------------------------------------
+*/
+Route::resource('kelas', KelasController::class)->except(['show', 'create']);
+
+/*
+|--------------------------------------------------------------------------
+| 👨‍🎓 SISWA ROUTES
 |--------------------------------------------------------------------------
 */
 Route::prefix('siswa')->name('siswa.')->group(function () {
@@ -63,50 +85,81 @@ Route::prefix('siswa')->name('siswa.')->group(function () {
     Route::delete('/delete/{nis}', [SiswaController::class, 'delete'])->name('delete');
 });
 
+
+// ===== GURU BK: BIMBINGAN =====
+Route::get('/gurubk/bimbingan', [BimbinganController::class, 'index'])
+    ->name('guru.bimbingan.index');
+
+
+Route::get('/gurubk/rekap-bimbingan', [BimbinganController::class, 'rekap'])
+    ->name('guru.bimbingan.rekap');
+
+Route::get('/gurubk/rekap-bimbingan/edit/{id}', [BimbinganController::class, 'edit'])
+    ->name('guru.bimbingan.edit');
+
+
+Route::delete('/gurubk/rekap-bimbingan/delete/{id}', [BimbinganController::class, 'destroy'])
+    ->name('guru.bimbingan.destroy');
+
+
+
 /*
 |--------------------------------------------------------------------------
-| BIMBINGAN, ABSENSI, DLL
-|--------------------------------------------------------------------------
-*/
-Route::get('/bimbingan', [BimbinganController::class, 'index'])->name('bimbingan');
-Route::post('/bimbingan', [BimbinganController::class, 'store'])->name('bimbingan.store');
-Route::put('/bimbingan/{id}', [BimbinganController::class, 'update'])->name('bimbingan.update');
-Route::delete('/bimbingan/{id}', [BimbinganController::class, 'destroy'])->name('bimbingan.destroy');
-Route::get('/rekapbimbingan', [RekapBimbinganController::class, 'index'])->name('rekapbimbingan.index');
-
-// 🟢 Rekap Absensi Guru BK
-Route::get('/bimbingan/rekapabsensi', [BimbinganController::class, 'index'])
-    ->name('bimbingan.rekapabsensi')
-    ->defaults('mode', 'rekapbk');
-
-/*
-|--------------------------------------------------------------------------
-| ABSENSI ROUTES
+| 📋 ABSENSI (INPUT GURU MAPEL)
 |--------------------------------------------------------------------------
 */
 Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
 Route::post('/absensi', [AbsensiController::class, 'store'])->name('absensi.store');
 
-// 🟡 REKAP ABSENSI
+// 🟡 Rekap absensi (versi admin)
 Route::get('/absensi/rekap', [RekapAbsensiController::class, 'index'])->name('absensi.rekap');
 Route::post('/absensi/rekap/update', [RekapAbsensiController::class, 'update'])->name('absensi.update');
+Route::get('/rekapabsensi', [RekapAbsensiController::class, 'index'])->name('rekapabsensi');
 
 /*
 |--------------------------------------------------------------------------
-| PELANGGARAN ROUTES
+| 🧑‍🏫 WALI KELAS PANEL (REKAP ABSENSI HARIAN)
+|--------------------------------------------------------------------------
+| Tambahan fitur edit & hapus data absensi wali kelas.
+*/
+/*
+|-------------------------------------------------------------------------- 
+| 🧑‍🏫 WALI KELAS PANEL (REKAP ABSENSI HARIAN)
+|-------------------------------------------------------------------------- 
+*/
+
+
+Route::prefix('wali')->group(function () {
+    Route::get('/rekapabsensi', [WaliController::class, 'rekapAbsensi'])->name('wali.rekapabsensi');
+    Route::get('/rekapabsensi/edit/{id}', [WaliController::class, 'editAbsensi'])->name('wali.editAbsensi');
+    Route::put('/rekapabsensi/update/{id}', [WaliController::class, 'updateAbsensi'])->name('wali.updateAbsensi');
+    Route::delete('/rekapabsensi/delete/{id}', [WaliController::class, 'deleteAbsensi'])->name('wali.deleteAbsensi');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| ⚠️ PELANGGARAN ROUTES
 |--------------------------------------------------------------------------
 */
+// 🔹 Halaman utama (input pelanggaran)
 Route::get('/pelanggaran', [PelanggaranController::class, 'index'])->name('pelanggaran.index');
-Route::post('/pelanggaran', [PelanggaranController::class, 'store'])->name('pelanggaran.store');
+
+// 🔹 Halaman rekap pelanggaran
 Route::get('/pelanggaran/rekap', [PelanggaranController::class, 'rekap'])->name('pelanggaran.rekap');
 
+// 🔹 Edit pelanggaran (form edit)
 Route::get('/pelanggaran/{id}/edit', [PelanggaranController::class, 'edit'])->name('pelanggaran.edit');
-Route::put('/pelanggaran/{id}', [PelanggaranController::class, 'update'])->name('pelanggaran.update');
-Route::delete('/pelanggaran/{id}', [PelanggaranController::class, 'destroy'])->name('pelanggaran.destroy');
 
+// 🔹 Update pelanggaran
+Route::put('/pelanggaran/{id}', [PelanggaranController::class, 'update'])->name('pelanggaran.update');
+
+// 🔹 Hapus pelanggaran
+Route::delete('/pelanggaran/{id}', [PelanggaranController::class, 'destroy'])->name('pelanggaran.destroy');
+Route::post('/pelanggaran', [PelanggaranController::class, 'store'])->name('pelanggaran.store');
 /*
 |--------------------------------------------------------------------------
-| PRESTASI ROUTES
+| 🏆 PRESTASI ROUTES
 |--------------------------------------------------------------------------
 */
 Route::prefix('prestasi')->group(function () {
@@ -118,25 +171,30 @@ Route::prefix('prestasi')->group(function () {
     Route::get('/edit/{id}', [PrestasiController::class, 'edit'])->name('prestasi.edit');
     Route::put('/update/{id}', [PrestasiController::class, 'update'])->name('prestasi.update');
     Route::delete('/{id}', [PrestasiController::class, 'destroy'])->name('prestasi.destroy');
-    
+
     Route::post('/kategori', [PrestasiController::class, 'storeKategori'])->name('kategori.store');
     Route::post('/jenis', [PrestasiController::class, 'storeJenis'])->name('jenis.store');
     Route::post('/simpan', [PrestasiController::class, 'store'])->name('prestasi.store');
 
     Route::delete('/kategori/{id}', [PrestasiController::class, 'destroyKategori'])->name('kategori.destroy');
-    Route::delete('/jenis/{id}', [PrestasiController::class, 'destroyJenis'])->name('prestasi.jenis.destroy');
+    Route::put('/kategori/{id}', [PrestasiController::class, 'update'])->name('kategori.update');
+    Route::put('/jenis/{id}', [PrestasiController::class, 'update'])->name('jenis.update');
+    Route::delete('/jenis/{id}', [PrestasiController::class, 'destroy'])->name('jenis.destroy');
+
 });
+
+
 
 /*
 |--------------------------------------------------------------------------
-| PEMANTAUAN ROUTE
+| 🔍 PEMANTAUAN ROUTES
 |--------------------------------------------------------------------------
 */
 Route::get('/pemantauan', [PemantauanController::class, 'index'])->name('pemantauan.index');
 
 /*
 |--------------------------------------------------------------------------
-| AJAX GET-SISWA (untuk prestasi & pelanggaran)
+| ⚙️ AJAX: GET SISWA
 |--------------------------------------------------------------------------
 */
 Route::get('/get-siswa', function (Request $request) {
@@ -150,3 +208,49 @@ Route::get('/get-siswa', function (Request $request) {
 
     return response()->json($siswa);
 });
+
+     /*
+|--------------------------------------------------------------------------
+| 🎓 BIMBINGAN (GURU BK PANEL)
+|--------------------------------------------------------------------------
+*/
+Route::get('/bimbingan', [BimbinganController::class, 'index'])->name('bimbingan');
+Route::post('/bimbingan', [BimbinganController::class, 'store'])->name('bimbingan.store');
+Route::put('/bimbingan/{id}', [BimbinganController::class, 'update'])->name('bimbingan.update');
+Route::delete('/bimbingan/{id}', [BimbinganController::class, 'destroy'])->name('bimbingan.destroy');
+Route::put('/bimbingan/update/{id}', [BimbinganController::class, 'update'])->name('bimbingan.update');
+Route::delete('/bimbingan/destroy/{id}', [BimbinganController::class, 'destroy'])->name('bimbingan.destroy');
+
+// 🟢 Rekap bimbingan
+Route::get('/rekapbimbingan', [RekapBimbinganController::class, 'index'])->name('rekapbimbingan');
+
+
+// Edit
+Route::get('/bimbingan/edit/{id}', [BimbinganController::class, 'edit'])->name('bimbingan.edit');
+
+// Update
+Route::post('/bimbingan/update/{id}', [BimbinganController::class, 'update'])->name('bimbingan.update');
+
+// Delete
+Route::delete('/bimbingan/delete/{id}', [BimbinganController::class, 'delete'])->name('bimbingan.delete');
+
+// WALI REKAP ABSENSI
+Route::get('/wali/rekapabsensi', 
+    [WaliController::class, 'rekapAbsensi']
+)->name('wali.rekapabsensi');
+
+
+
+// Wali Absensi (Edit/Hapus)
+Route::get('/wali/absensi/{id}/edit', [WaliController::class, 'editAbsensi'])->name('wali.absensi.edit');
+Route::delete('/wali/absensi/{id}/delete', [WaliController::class, 'deleteAbsensi'])->name('wali.absensi.delete');
+Route::post('/wali/absensi/{id}/update', [WaliController::class, 'updateAbsensi'])->name('wali.absensi.update');
+
+Route::put('/wali/rekapabsensi/update/{id}', 
+    [WaliController::class, 'updateAbsensi']
+)->name('wali.updateAbsensi');
+
+Route::get('/pemantauan/absensi/detail',
+    [PemantauanController::class, 'detailAbsensi']
+)->name('pemantauan.absensi.detail');
+

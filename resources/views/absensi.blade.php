@@ -3,51 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <title>Absensi Wali Kelas</title>
+
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body { background-color: #f8f9fa; }
-    .navbar-brand { font-weight: bold; }
-    .nav-link.active { color: #0d6efd !important; font-weight: bold; }
-  </style>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  @vite(['resources/css/absensi.css'])
 </head>
 
+
 <body>
-  <!-- 🔹 Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="{{ route('absensi.index') }}">📋 Absensi Wali Kelas</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
 
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto">
-          <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('absensi.index') ? 'active' : '' }}" href="{{ route('absensi.index') }}">📝 Input Absensi</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('absensi.rekap') ? 'active' : '' }}" href="{{ route('absensi.rekap') }}">📊 Rekap Absensi</a>
-          </li>
-        </ul>
-
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item d-flex align-items-center me-3 text-white fw-semibold">
-            👤 {{ Auth::user()->name ?? 'Guru Wali' }}
-          </li>
-          <li class="nav-item">
-            <form method="POST" action="{{ route('logout') }}">
-              @csrf
-              <button type="submit" class="btn btn-outline-light btn-sm">🚪 Logout</button>
-            </form>
-          </li>
-        </ul>
-      </div>
+<!-- 🔹 Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+  <div class="container-fluid d-flex justify-content-between align-items-center">
+    
+    <!-- 🔹 Kiri: Judul + Nama -->
+    <div class="d-flex align-items-center">
+      <a class="navbar-brand fw-bold mb-0 h5 text-white">Absensi Wali Kelas Panel</a>
+      <span class="text-white">| {{ session('nama') ?? 'Guru Wali' }}</span>
     </div>
-  </nav>
+
+    <!-- 🔹 Kanan: Menu Navigasi -->
+    <ul class="navbar-nav d-flex align-items-center">
+      <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('absensi.index') ? 'active' : '' }}" href="{{ route('absensi.index') }}">
+          Input Absensi
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('wali.rekapabsensi') ? 'active' : '' }}" href="{{ route('wali.rekapabsensi') }}">
+          Rekap Absensi
+        </a>
+
+      </li>
+      <li class="nav-item ms-3">
+        <form method="GET" action="{{ route('logout') }}">
+          <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+        </form>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+
+
+<!-- 🔙 Tombol Kembali ke Menu Wali Kelas -->
+<div class="mb-4">
+  <a href="{{ route('kebutuhanwalikelas') }}" class="btn btn-kembali shadow-sm d-inline-flex align-items-center">
+    <i class="bi bi-arrow-left-circle me-2"></i> Kembali ke Menu Wali Kelas
+  </a>
+</div>
 
   <!-- 🔹 Main Content -->
   <div class="container py-5">
-    <h3 class="text-center mb-4">📋 Absensi Wali Kelas</h3>
+    <h3 class="text-center mb-4">Absensi Wali Kelas</h3>
 
     @if(session('success'))
       <div class="alert alert-success text-center">{{ session('success') }}</div>
@@ -107,7 +118,8 @@
       <div class="row justify-content-center mb-4">
         <div class="col-md-3">
           <label class="form-label fw-bold">Tanggal Absensi</label>
-          <input type="date" name="tanggal" class="form-control" value="{{ $tanggal }}" required>
+          <input type="date" name="tanggal" class="form-control" required>
+
         </div>
       </div>
 
@@ -150,7 +162,7 @@
       </table>
 
       <div class="text-center">
-        <button type="submit" class="btn btn-success mt-3">💾 Simpan Absensi</button>
+        <button type="submit" class="btn btn-success mt-3">Simpan Absensi</button>
       </div>
     </form>
     @endif
@@ -158,35 +170,44 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- Tempat menyimpan data JSON secara aman ke atribut data (hindari @ di dalam script untuk editor/JS parser) -->
+  <div id="kelasDataHolder" data-kelas='@json(App\Models\Kelas::select("nama_kelas", "tahunAjar")->get())' style="display:none"></div>
+
   <!-- 🔹 Script Dinamis Tahun Ajar -->
-  <script>
-  document.addEventListener('DOMContentLoaded', function () {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
     const kelasSelect = document.getElementById('kelasSelect');
     const tahunAjarSelect = document.getElementById('tahunAjarSelect');
 
-    // Semua data kelas + tahun ajar dari database
-    const kelasData = @json(\App\Models\Kelas::select('nama_kelas', 'tahunAjar')->get());
+    // Ambil JSON dari atribut data dan parse menjadi objek JS
+    const kelasDataElem = document.getElementById('kelasDataHolder');
+    const kelasData = kelasDataElem ? JSON.parse(kelasDataElem.getAttribute('data-kelas') || '[]') : [];
 
-    kelasSelect.addEventListener('change', function () {
-      const selectedKelas = this.value;
+    // Pastikan elemen ada sebelum menambahkan event listener
+    if (!kelasSelect || !tahunAjarSelect) {
+        return;
+    }
 
-      // Kosongkan dropdown tahun ajar
-      tahunAjarSelect.innerHTML = '<option value="">-- Pilih Tahun Ajar --</option>';
+    kelasSelect.addEventListener('change', function() {
+        const selectedKelas = this.value;
 
-      // Filter tahun ajar berdasarkan kelas yang dipilih
-      kelasData.forEach(item => {
-        if (item.nama_kelas === selectedKelas) {
-          const opt = document.createElement('option');
-          opt.value = item.tahunAjar;
-          opt.textContent = item.tahunAjar;
-          tahunAjarSelect.appendChild(opt);
-        }
-      });
+        // Kosongkan dropdown tahun ajar
+        tahunAjarSelect.innerHTML = '<option value="">-- Pilih Tahun Ajar --</option>';
 
-      // Optional UX: disable jika belum pilih kelas
-      tahunAjarSelect.disabled = selectedKelas === '';
+        // Filter tahun ajar sesuai kelas
+        kelasData.forEach(item => {
+            if (item.nama_kelas === selectedKelas) {
+                const opt = document.createElement('option');
+                opt.value = item.tahunAjar;
+                opt.textContent = item.tahunAjar;
+                tahunAjarSelect.appendChild(opt);
+            }
+        });
+
+        tahunAjarSelect.disabled = selectedKelas === '';
     });
-  });
-  </script>
+});
+</script>
+
 </body>
 </html>

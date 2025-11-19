@@ -89,3 +89,19 @@ body {
     width: 100%;
   }
 }
+
+/* 🔙 Tombol Kembali */
+.btn-kembali {
+    background-color: #343a40 !important; /* warna abu gelap */
+    color: #fff !important;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.btn-kembali:hover {
+    background-color: #23272b !important; /* lebih gelap saat hover */
+    color: #fff !important;
+}
+
