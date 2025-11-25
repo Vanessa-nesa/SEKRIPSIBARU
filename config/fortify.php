@@ -144,19 +144,19 @@ return [
     */
 
     'features' => [
-        Features::registration(),
-        Features::resetPasswords(),
-        Features::emailVerification(),
-<<<<<<< HEAD
-        Features::updateProfileInformation(),
-        Features::updatePasswords(),
-=======
->>>>>>> b4712e343ea9b1a684999026f127c6e091fd7427
-        Features::twoFactorAuthentication([
-            'confirm' => true,
-            'confirmPassword' => true,
-            // 'window' => 0
-        ]),
-    ],
+    Features::registration(),
+    Features::resetPasswords(),
+    Features::emailVerification(),
+
+    Features::updateProfileInformation(),
+    Features::updatePasswords(),
+
+    Features::twoFactorAuthentication([
+        'confirm' => true,
+        'confirmPassword' => true,
+        // 'window' => 0
+    ]),
+]
+
 
 ];

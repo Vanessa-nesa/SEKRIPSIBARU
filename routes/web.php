@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-<<<<<<< HEAD
 use Illuminate\Http\Request;
 
 // 🔹 Import semua controller yang digunakan
@@ -17,7 +16,6 @@ use App\Http\Controllers\PrestasiController;
 use App\Http\Controllers\PemantauanController;
 use App\Http\Controllers\WaliController; 
 use App\Models\Siswa;
-=======
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
@@ -26,7 +24,6 @@ Route::get('/', function () {
         'canRegister' => Features::enabled(Features::registration()),
     ]);
 })->name('home');
->>>>>>> b4712e343ea9b1a684999026f127c6e091fd7427
 
 use App\Http\Controllers\GuruBKController;
 
@@ -96,7 +93,6 @@ Route::prefix('siswa')->name('siswa.')->group(function () {
     Route::delete('/delete/{nis}', [SiswaController::class, 'delete'])->name('delete');
 });
 
-<<<<<<< HEAD
 
 // ===== GURU BK: BIMBINGAN =====
 Route::get('/gurubk/bimbingan', [BimbinganController::class, 'index'])
@@ -266,6 +262,5 @@ Route::get('/pemantauan/absensi/detail',
     [PemantauanController::class, 'detailAbsensi']
 )->name('pemantauan.absensi.detail');
 
-=======
-require __DIR__.'/settings.php';
->>>>>>> b4712e343ea9b1a684999026f127c6e091fd7427
+
+

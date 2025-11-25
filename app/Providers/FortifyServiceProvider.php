@@ -8,12 +8,8 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
-<<<<<<< HEAD
-=======
 use Illuminate\Support\Str;
-use Inertia\Inertia;
 use Laravel\Fortify\Features;
->>>>>>> b4712e343ea9b1a684999026f127c6e091fd7427
 use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -31,92 +27,41 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-<<<<<<< HEAD
         /**
-         * 🔹 Definisikan tampilan untuk halaman login & register
+         * 🔹 Halaman Login & Register (Blade)
          */
         Fortify::loginView(function () {
-            return view('login'); // pastikan file: resources/views/login.blade.php
+            return view('login'); 
         });
 
         Fortify::registerView(function () {
-            return view('regis'); // pastikan file: resources/views/regis.blade.php
+            return view('regis'); 
         });
 
         /**
-         * 🔹 Tambahkan RateLimiter untuk LOGIN
-         * Supaya error “Rate limiter [login] is not defined” hilang
+         * 🔹 Action Fortify
          */
-        RateLimiter::for('login', function (Request $request) {
-            // Maksimum 5 percobaan login per menit per IP / username
-            $username = (string) $request->input('username');
-
-            return Limit::perMinute(5)->by($username . $request->ip());
-        });
-
-        /**
-         * 🔹 Rate limiter untuk 2FA (opsional, aman dibiarkan)
-         */
-=======
-        $this->configureActions();
-        $this->configureViews();
-        $this->configureRateLimiting();
-    }
-
-    /**
-     * Configure Fortify actions.
-     */
-    private function configureActions(): void
-    {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
-    }
 
-    /**
-     * Configure Fortify views.
-     */
-    private function configureViews(): void
-    {
-        Fortify::loginView(fn (Request $request) => Inertia::render('auth/login', [
-            'canResetPassword' => Features::enabled(Features::resetPasswords()),
-            'canRegister' => Features::enabled(Features::registration()),
-            'status' => $request->session()->get('status'),
-        ]));
+        /**
+         * 🔹 RateLimiter LOGIN
+         */
+        RateLimiter::for('login', function (Request $request) {
+            $username = (string) $request->input(Fortify::username());
 
-        Fortify::resetPasswordView(fn (Request $request) => Inertia::render('auth/reset-password', [
-            'email' => $request->email,
-            'token' => $request->route('token'),
-        ]));
-
-        Fortify::requestPasswordResetLinkView(fn (Request $request) => Inertia::render('auth/forgot-password', [
-            'status' => $request->session()->get('status'),
-        ]));
-
-        Fortify::verifyEmailView(fn (Request $request) => Inertia::render('auth/verify-email', [
-            'status' => $request->session()->get('status'),
-        ]));
-
-        Fortify::registerView(fn () => Inertia::render('auth/register'));
-
-        Fortify::twoFactorChallengeView(fn () => Inertia::render('auth/two-factor-challenge'));
-
-        Fortify::confirmPasswordView(fn () => Inertia::render('auth/confirm-password'));
-    }
-
-    /**
-     * Configure rate limiting.
-     */
-    private function configureRateLimiting(): void
-    {
->>>>>>> b4712e343ea9b1a684999026f127c6e091fd7427
-        RateLimiter::for('two-factor', function (Request $request) {
-            return Limit::perMinute(5)->by($request->session()->get('login.id'));
+            return Limit::perMinute(5)->by(
+                $username.'|'.$request->ip()
+            );
         });
 
-        RateLimiter::for('login', function (Request $request) {
-            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
-
-            return Limit::perMinute(5)->by($throttleKey);
+        /**
+         * 🔹 RateLimiter TWO FACTOR AUTH
+         */
+        RateLimiter::for('two-factor', function (Request $request) {
+            return Limit::perMinute(5)->by(
+                $request->session()->get('login.id')
+            );
         });
     }
 }
