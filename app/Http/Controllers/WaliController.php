@@ -17,7 +17,9 @@ class WaliController extends Controller
         $kelas = $request->get('kelas');
         $jurusan = $request->get('jurusan');
         $tahunAjar = $request->get('tahunAjar');
-        $tanggal = $request->get('tanggal');
+        $tanggal_awal = $request->get('tanggal_awal');
+        $tanggal_akhir = $request->get('tanggal_akhir');
+
 
         $rekapAbsensi = collect();
         $detailAbsensi = collect();
@@ -27,54 +29,68 @@ class WaliController extends Controller
         $daftar_tahunAjar = Kelas::select('tahunAjar')->distinct()->orderByDesc('tahunAjar')->pluck('tahunAjar');
 
         // 🔹 Jalankan query hanya jika semua filter diisi
-        if ($kelas && $jurusan && $tahunAjar && $tanggal) {
+       $tanggal_awal = $request->get('tanggal_awal');
+$tanggal_akhir = $request->get('tanggal_akhir');
 
-            // 📊 Rekap total absensi per hari
-            $rekapAbsensi = DB::table('absensi')
-                ->join('siswa', 'absensi.NIS', '=', 'siswa.NIS')
-                ->select(
-                    DB::raw('COUNT(absensi.id_absensi) as total'),
-                    DB::raw('SUM(CASE WHEN status = "Hadir" THEN 1 ELSE 0 END) as hadir'),
-                    DB::raw('SUM(CASE WHEN status = "Sakit" THEN 1 ELSE 0 END) as sakit'),
-                    DB::raw('SUM(CASE WHEN status = "Izin" THEN 1 ELSE 0 END) as izin'),
-                    DB::raw('SUM(CASE WHEN status = "Alpha" THEN 1 ELSE 0 END) as alpha'),
-                    'absensi.tanggal',
-                    'siswa.kelas_siswa',
-                    'siswa.jurusan_siswa',
-                    'absensi.tahunAjar'
-                )
-                ->where('siswa.kelas_siswa', $kelas)
-                ->where('siswa.jurusan_siswa', $jurusan)
-                ->where('absensi.tahunAjar', $tahunAjar)
-                ->where('absensi.tanggal', $tanggal) // ✅ varchar, bukan date
-                ->groupBy('absensi.tanggal', 'siswa.kelas_siswa', 'siswa.jurusan_siswa', 'absensi.tahunAjar')
-                ->orderBy('absensi.tanggal', 'desc')
-                ->get();
+if ($kelas && $jurusan && $tahunAjar && $tanggal_awal && $tanggal_akhir) {
 
-// 👥 Detail daftar siswa per status absensi
-$detailAbsensi = Absensi::join('siswa', 'absensi.NIS', '=', 'siswa.NIS')
-    ->select(
-        'absensi.id_absensi',
-        'absensi.tanggal',
-        'absensi.status',
-        'absensi.keterangan',
-        'siswa.nama_siswa',
-        'siswa.kelas_siswa',
-        'siswa.jurusan_siswa'
-    )
-    ->where('siswa.kelas_siswa', $kelas)
-    ->where('siswa.jurusan_siswa', $jurusan)
-    ->where('absensi.tahunAjar', $tahunAjar)
-    ->where('absensi.tanggal', $tanggal)
-    ->orderBy('siswa.nama_siswa')
-    ->get();   // ❗ TANPA groupBy !!!
-        }
+    $rekapAbsensi = Absensi::join('siswa', 'absensi.NIS', '=', 'siswa.NIS')
+        ->select(
+            'absensi.tanggal',
+            'siswa.kelas_siswa',
+            'siswa.jurusan_siswa',
+            'absensi.tahunAjar',
+            'absensi.id_absensi',
+    
+        )
+        ->selectRaw('
+            COUNT(*) as total,
+            SUM(CASE WHEN status = "Hadir" THEN 1 ELSE 0 END) as hadir,
+            SUM(CASE WHEN status = "Sakit" THEN 1 ELSE 0 END) as sakit,
+            SUM(CASE WHEN status = "Izin" THEN 1 ELSE 0 END) as izin,
+            SUM(CASE WHEN status = "Alpha" THEN 1 ELSE 0 END) as alpha
+        ')
+        ->whereRaw('LOWER(siswa.kelas_siswa) = ?', [strtolower($kelas)])
+        ->whereRaw('LOWER(siswa.jurusan_siswa) = ?', [strtolower($jurusan)])
+        ->where('absensi.tahunAjar', $tahunAjar)
+        ->whereBetween('absensi.tanggal', [$tanggal_awal, $tanggal_akhir])
+        ->groupBy(
+            'absensi.tanggal',
+            'siswa.kelas_siswa',
+            'siswa.jurusan_siswa',
+            'absensi.tahunAjar',
+            'absensi.id_absensi'
+        )
+        ->orderByDesc('absensi.tanggal')
+        ->get();
+
+    // DETAIL
+    $detailAbsensi = Absensi::join('siswa', 'absensi.NIS', '=', 'siswa.NIS')
+        ->select(
+            'absensi.id_absensi',
+            'absensi.NIS',
+            'siswa.nama_siswa',
+            'siswa.kelas_siswa',
+            'siswa.jurusan_siswa',
+            'absensi.status',
+            'absensi.keterangan',
+            'absensi.tanggal'
+        )
+        ->whereRaw('LOWER(siswa.kelas_siswa) = ?', [strtolower($kelas)])
+        ->whereRaw('LOWER(siswa.jurusan_siswa) = ?', [strtolower($jurusan)])
+        ->where('absensi.tahunAjar', $tahunAjar)
+        ->whereBetween('absensi.tanggal', [$tanggal_awal, $tanggal_akhir])
+        ->orderBy('siswa.nama_siswa', 'asc')
+        ->get();
+}
+
 
         return view('wali.rekapabsensi', compact(
             'kelas',
             'jurusan',
             'tahunAjar',
-            'tanggal',
+            'tanggal_awal',
+            'tanggal_akhir',
             'daftar_kelas',
             'daftar_tahunAjar',
             'rekapAbsensi',

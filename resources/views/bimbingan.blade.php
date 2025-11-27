@@ -8,7 +8,7 @@
   <style>
     body { background-color:#f8f9fa; }
     .navbar-brand { font-weight:bold; }
-      .btn-kembali {
+    .btn-kembali {
     background-color: #343a40;
     color: #fff;
     padding: 8px 16px;
@@ -33,7 +33,13 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">Guru BK Panel</a>
+    <a class="navbar-brand" href="#">
+    Guru BK Panel
+    @if(session('nama'))
+        <span class="ms-2 fw-bold text-white">| {{ session('nama') }}</span>
+    @endif
+</a>
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -173,71 +179,72 @@
   {{-- ===========================================================
        TAB 2 : REKAP ABSENSI
   ============================================================ --}}
-  <div id="tab-rekapabsen" style="display:none;">
+<div id="tab-rekapabsen" style="display:none;">
     <h3 class="text-center mb-4">Rekap Absensi Siswa</h3>
 
- <div class="mx-auto" style="max-width:1100px; margin-top:30px;">
-    <form method="GET" action="{{ route('bimbingan') }}"
-          class="row g-4 align-items-end justify-content-center">
+    <div class="mx-auto" style="max-width:1100px; margin-top:30px;">
+       <form method="GET" action="{{ route('bimbingan') }}"
+      class="row g-4 justify-content-center">
 
-        <input type="hidden" name="mode" value="rekapbk">
+    <input type="hidden" name="mode" value="rekapbk">
 
-        <!-- Kelas -->
-        <div class="col-md-3">
-            <label class="form-label fw-bold">Kelas</label>
-            <select class="form-select" name="kelas">
-                @foreach($daftar_kelas as $k)
-                    <option value="{{ $k->nama_kelas }}"
-                        {{ request('kelas') == $k->nama_kelas ? 'selected' : '' }}>
-                        {{ $k->nama_kelas }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+    <!-- Kelas -->
+    <div class="col-md-2">
+        <label class="form-label fw-bold">Kelas</label>
+        <select class="form-select" name="kelas">
+            @foreach($daftar_kelas as $k)
+                <option value="{{ $k->nama_kelas }}" {{ request('kelas')==$k->nama_kelas?'selected':'' }}>
+                    {{ $k->nama_kelas }}
+                </option>
+            @endforeach
+        </select>
+    </div>
 
-        <!-- Jurusan -->
-        <div class="col-md-3">
-            <label class="form-label fw-bold">Jurusan</label>
-            <select class="form-select" name="jurusan">
-                @foreach($daftar_jurusan as $j)
-                    <option value="{{ $j }}"
-                        {{ request('jurusan') == $j ? 'selected' : '' }}>
-                        {{ $j }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+    <!-- Jurusan -->
+    <div class="col-md-2">
+        <label class="form-label fw-bold">Jurusan</label>
+        <select class="form-select" name="jurusan">
+            @foreach($daftar_jurusan as $j)
+                <option value="{{ $j }}" {{ request('jurusan')==$j?'selected':'' }}>
+                    {{ $j }}
+                </option>
+            @endforeach
+        </select>
+    </div>
 
-        <!-- Tahun Ajar -->
-        <div class="col-md-3">
-            <label class="form-label fw-bold">Tahun Ajar</label>
-            <select class="form-select" name="tahunAjar">
-                @foreach($daftar_tahunAjar as $t)
-                    <option value="{{ $t }}"
-                        {{ request('tahunAjar') == $t ? 'selected' : '' }}>
-                        {{ $t }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+    <!-- Tahun Ajar -->
+    <div class="col-md-2">
+        <label class="form-label fw-bold">Tahun Ajar</label>
+        <select class="form-select" name="tahunAjar">
+            @foreach($daftar_tahunAjar as $t)
+                <option value="{{ $t }}" {{ request('tahunAjar')==$t?'selected':'' }}>
+                    {{ $t }}
+                </option>
+            @endforeach
+        </select>
+    </div>
 
-        <!-- Tanggal -->
-        <div class="col-md-3">
-            <label class="form-label fw-bold">Tanggal</label>
-            <input type="date" class="form-control" name="tanggal"
-                   value="{{ request('tanggal') }}">
-        </div>
+    <!-- Tanggal Awal -->
+    <div class="col-md-3">
+        <label class="form-label fw-bold">Tanggal Awal</label>
+        <input type="date" class="form-control" name="tanggal_awal"
+               value="{{ request('tanggal_awal') }}" required>
+    </div>
 
-        <!-- Tombol Tampilkan -->
-        <div class="col-md-3 text-center mt-3">
-            <button class="btn btn-primary w-100 py-2">
-                Tampilkan
-            </button>
-        </div>
+    <!-- Tanggal Akhir -->
+    <div class="col-md-3">
+        <label class="form-label fw-bold">Tanggal Akhir</label>
+        <input type="date" class="form-control" name="tanggal_akhir"
+               value="{{ request('tanggal_akhir') }}" required>
+    </div>
 
-    </form>
-</div>
+    <!-- Tombol -->
+    <div class="col-md-2 d-flex align-items-end justify-content-end">
+        <button class="btn btn-primary w-100 py-2">Tampilkan</button>
+    </div>
+</form>
 
+    </div>
 
     {{-- Tabel Rekap --}}
     @if(isset($rekap) && $rekap->count() > 0)
@@ -252,11 +259,11 @@
                 </thead>
                 <tbody>
                     @foreach($rekap as $r)
-                    <tr>
-                        <td>{{ $r->nama_siswa }}</td>
-                        <td>{{ $r->status }}</td>
-                        <td>{{ \Carbon\Carbon::parse($r->tanggal)->format('d-m-Y') }}</td>
-                    </tr>
+                        <tr>
+                            <td>{{ $r->nama_siswa }}</td>
+                            <td>{{ $r->status }}</td>
+                            <td>{{ \Carbon\Carbon::parse($r->tanggal)->format('d-m-Y') }}</td>
+                        </tr>
                     @endforeach
                 </tbody>
             </table>
@@ -272,6 +279,7 @@
 
 
 
+
   {{-- ===========================================================
        TAB 3 : REKAP BIMBINGAN
   ============================================================ --}}
@@ -279,11 +287,11 @@
   <h3 class="text-center mb-4">Rekap Bimbingan Konseling</h3>
 
   <div class="mx-auto" style="max-width:900px;">
-  <form method="GET" action="{{ route('bimbingan') }}" class="row g-3 mb-4">
+<form method="GET" action="{{ route('bimbingan') }}" class="row g-3 mb-4">
     <input type="hidden" name="mode" value="rekapbimbingan">
 
     <!-- KELAS -->
-    <div class="col-md-3">
+    <div class="col-md-2">
       <label class="form-label fw-bold">Kelas</label>
       <select name="kelas" class="form-select" required>
         <option value="">-- Pilih Kelas --</option>
@@ -296,7 +304,7 @@
     </div>
 
     <!-- JURUSAN -->
-    <div class="col-md-3">
+    <div class="col-md-2">
       <label class="form-label fw-bold">Jurusan</label>
       <select name="jurusan" class="form-select" required>
         <option value="">-- Pilih Jurusan --</option>
@@ -307,7 +315,7 @@
     </div>
 
     <!-- TAHUN AJAR -->
-    <div class="col-md-3">
+    <div class="col-md-2">
       <label class="form-label fw-bold">Tahun Ajar</label>
       <select name="tahunAjar" class="form-select" required>
         <option value="">-- Pilih Tahun Ajar --</option>
@@ -317,18 +325,28 @@
       </select>
     </div>
 
-    <!-- TANGGAL (INPUT DATE - BUKAN DROPDOWN!) -->
+    <!-- Tanggal Awal -->
     <div class="col-md-3">
-      <label class="form-label fw-bold">Tanggal Bimbingan</label>
-      <input type="date" name="tanggal_riwayat" class="form-control"
-             value="{{ $tanggal_riwayat ?? '' }}" required>
+      <label class="form-label fw-bold">Tanggal Awal</label>
+      <input type="date" name="tanggal_awal_bimbingan" class="form-control"
+             value="{{ request('tanggal_awal_bimbingan') }}" required>
     </div>
 
-<div class="col-12 text-center mt-3">
-    <button type="submit" class="btn btn-primary px-5">Tampilkan</button>
-</div>
+    <!-- Tanggal Akhir -->
+    <div class="col-md-3">
+      <label class="form-label fw-bold">Tanggal Akhir</label>
+      <input type="date" name="tanggal_akhir_bimbingan" class="form-control"
+             value="{{ request('tanggal_akhir_bimbingan') }}" required>
+    </div>
 
-  </form>
+    <!-- Tombol -->
+    <div class="col-12 text-center mt-3">
+      <button type="submit" class="btn btn-primary px-5">Tampilkan</button>
+    </div>
+
+</form>
+
+
     @if(isset($riwayat)&&$riwayat->count()>0)
     <div class="table-responsive">
       <table class="table table-bordered align-middle text-center shadow-sm">
@@ -368,7 +386,7 @@
             onsubmit="return confirm('Yakin hapus data ini?')">
           @csrf
           @method('DELETE')
-          <button class="btn btn-danger btn-sm">🗑️ Hapus</button>
+          <button class="btn btn-danger btn-sm">Hapus</button>
       </form>
     </td>
 </tr>
@@ -418,7 +436,9 @@
           <input type="hidden" name="kelas" value="{{ $kelas }}">
           <input type="hidden" name="jurusan" value="{{ $jurusan }}">
           <input type="hidden" name="tahunAjar" value="{{ $tahunAjar }}">
-          <input type="hidden" name="tanggal" value="{{ $tanggal_riwayat }}">
+          <input type="hidden" name="tanggal_awal_bimbingan" value="{{ request('tanggal_awal_bimbingan') }}">
+          <input type="hidden" name="tanggal_akhir_bimbingan" value="{{ request('tanggal_akhir_bimbingan') }}">
+
         </div>
 
         <div class="modal-footer">
@@ -438,54 +458,77 @@
 <div id="tab-rekappelanggaran" style="display:none;">
   <h3 class="text-center mb-4">Rekap Pelanggaran Siswa</h3>
 
-  <form method="GET" action="{{ route('bimbingan') }}" class="row justify-content-center g-3 mb-4">
+<form method="GET" action="{{ route('bimbingan') }}" class="mb-4">
+
     <input type="hidden" name="mode" value="rekappelanggaran">
 
-    <!-- KELAS -->
-    <div class="col-md-3">
-      <label class="form-label fw-bold">Kelas</label>
-      <select name="kelas" class="form-select" required>
-        <option value="">-- Pilih Kelas --</option>
-        @foreach($daftar_kelas as $k)
-          <option value="{{ $k->nama_kelas }}" {{ ($kelas??'')==$k->nama_kelas?'selected':'' }}>
-            {{ $k->nama_kelas }}
-          </option>
-        @endforeach
-      </select>
+    <div class="row g-4 justify-content-center">
+
+        <!-- Kelas -->
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Kelas</label>
+            <select name="kelas" class="form-select" required>
+                @foreach($daftar_kelas as $k)
+                    <option value="{{ $k->nama_kelas }}" {{ request('kelas')==$k->nama_kelas?'selected':'' }}>
+                        {{ $k->nama_kelas }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Jurusan -->
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Jurusan</label>
+            <select name="jurusan" class="form-select" required>
+                @foreach($daftar_jurusan as $j)
+                    <option value="{{ $j }}" {{ request('jurusan')==$j?'selected':'' }}>
+                        {{ $j }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Tahun Ajar -->
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Tahun Ajar</label>
+            <select name="tahunAjar" class="form-select" required>
+                @foreach($daftar_tahunAjar as $t)
+                    <option value="{{ $t }}" {{ request('tahunAjar')==$t?'selected':'' }}>
+                        {{ $t }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Tanggal Awal -->
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Tanggal Awal</label>
+            <input type="date" name="tanggal_awal_pelanggaran" class="form-control"
+                   value="{{ request('tanggal_awal_pelanggaran') }}" required>
+        </div>
+
+        <!-- Tanggal Akhir -->
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Tanggal Akhir</label>
+            <input type="date" name="tanggal_akhir_pelanggaran" class="form-control"
+                   value="{{ request('tanggal_akhir_pelanggaran') }}" required>
+        </div>
+
+        <!-- Tombol -->
+        <div class="col-md-2 d-flex align-items-end">
+            <button class="btn btn-primary w-100">Tampilkan</button>
+        </div>
+
     </div>
 
-    <!-- JURUSAN -->
-    <div class="col-md-3">
-      <label class="form-label fw-bold">Jurusan</label>
-      <select name="jurusan" class="form-select" required>
-        <option value="">-- Pilih Jurusan --</option>
-        @foreach($daftar_jurusan as $j)
-          <option value="{{ $j }}" {{ ($jurusan??'')==$j?'selected':'' }}>{{ $j }}</option>
-        @endforeach
-      </select>
-    </div>
+</form>
 
-    <!-- TAHUN AJAR -->
-    <div class="col-md-3">
-      <label class="form-label fw-bold">Tahun Ajar</label>
-      <select name="tahunAjar" class="form-select" required>
-        <option value="">-- Pilih Tahun Ajar --</option>
-        @foreach($daftar_tahunAjar as $t)
-          <option value="{{ $t }}" {{ ($tahunAjar??'')==$t?'selected':'' }}>{{ $t }}</option>
-        @endforeach
-      </select>
-    </div>
 
-    <!-- TANGGAL -->
-    <div class="col-md-3">
-      <label class="form-label fw-bold">Tanggal</label>
-      <input type="date" name="tanggal_pelanggaran" class="form-control" value="{{ $tanggal_pelanggaran ?? '' }}">
-    </div>
 
-    <div class="col-md-2 d-flex align-items-end">
-      <button class="btn btn-primary w-100">Tampilkan</button>
-    </div>
-  </form>
+
+
+
+
 
   @if(isset($rekap_pelanggaran) && $rekap_pelanggaran->count() > 0)
     <div class="mx-auto" style="max-width:1100px;">

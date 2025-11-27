@@ -18,10 +18,20 @@ public function index(Request $request)
     $kelas = $request->kelas;
     $jurusan = $request->jurusan;
     $tahunAjar = $request->tahunAjar;
-    $tanggal = $request->tanggal;
     $mode = $request->mode ?? 'bimbingan';
-    $tanggal_riwayat = $request->tanggal_riwayat;
-    $tanggal_pelanggaran = $request->tanggal_pelanggaran;
+    // Rekap Absensi
+    $tanggal_awal = $request->tanggal_awal;
+    $tanggal_akhir = $request->tanggal_akhir;
+
+    // Rekap Bimbingan
+    $tanggal_awal_bimbingan = $request->tanggal_awal_bimbingan;
+    $tanggal_akhir_bimbingan = $request->tanggal_akhir_bimbingan;
+
+    // Rekap Pelanggaran
+    $tanggal_awal_pelanggaran = $request->tanggal_awal_pelanggaran;
+    $tanggal_akhir_pelanggaran = $request->tanggal_akhir_pelanggaran;
+
+
 
     // Dropdown
     $daftar_kelas = Kelas::select('nama_kelas')->distinct()->orderBy('nama_kelas')->get();
@@ -44,71 +54,71 @@ public function index(Request $request)
     // MODE: REKAP ABSENSI
     // =====================
     $rekapAbsensi = collect();
-    if ($mode == 'rekapbk' && $kelas && $jurusan && $tahunAjar) {
+if ($mode == 'rekapbk' && $kelas && $jurusan && $tahunAjar) {
+    $rekapAbsensi = Absensi::join('siswa','siswa.NIS','=','absensi.NIS')
+        ->select('siswa.nama_siswa','absensi.status','absensi.tanggal')
+        ->where('siswa.kelas_siswa',$kelas)
+        ->where('siswa.jurusan_siswa',$jurusan)
+        ->where('absensi.tahunAjar',$tahunAjar)
+        ->when($tanggal_awal && $tanggal_akhir, function($q) use ($tanggal_awal, $tanggal_akhir) {
+            $q->whereBetween('absensi.tanggal', [$tanggal_awal, $tanggal_akhir]);
+        })
+        ->orderBy('absensi.tanggal','desc')
+        ->get();
+}
 
-        $rekapAbsensi = Absensi::join('siswa','siswa.NIS','=','absensi.NIS')
-            ->select('siswa.nama_siswa','absensi.status','absensi.tanggal')
-            ->where('siswa.kelas_siswa',$kelas)
-            ->where('siswa.jurusan_siswa',$jurusan)
-            ->where('absensi.tahunAjar',$tahunAjar)
-            ->when($tanggal, fn($q)=>$q->whereDate('absensi.tanggal',$tanggal))
-            ->orderBy('absensi.tanggal','desc')
-            ->get();
-    }
 
     // =====================
     // MODE: REKAP BIMBINGAN
     // =====================
     $riwayat = collect();
-    if ($mode == 'rekapbimbingan' && $kelas && $jurusan && $tahunAjar && $tanggal_riwayat) {
+if ($mode == 'rekapbimbingan' && $kelas && $jurusan && $tahunAjar) {
 
-        $riwayat = Bimbingan::join('siswa','siswa.NIS','=','bimbingan.NIS')
-    ->select('bimbingan.*','siswa.nama_siswa','siswa.kelas_siswa','siswa.jurusan_siswa')
-    ->where('siswa.kelas_siswa',$kelas)
-    ->where('siswa.jurusan_siswa',$jurusan)
-    ->where('bimbingan.tahunAjar',$tahunAjar)
-    ->whereDate('bimbingan.tanggal', $tanggal_riwayat)
-    ->orderBy('bimbingan.tanggal','desc')
+    $riwayat = Bimbingan::join('siswa','siswa.NIS','=','bimbingan.NIS')
+        ->select('bimbingan.*','siswa.nama_siswa','siswa.kelas_siswa','siswa.jurusan_siswa')
+        ->where('siswa.kelas_siswa',$kelas)
+        ->where('siswa.jurusan_siswa',$jurusan)
+        ->where('bimbingan.tahunAjar',$tahunAjar)
+        ->when($tanggal_awal_bimbingan && $tanggal_akhir_bimbingan, function($q) use ($tanggal_awal_bimbingan, $tanggal_akhir_bimbingan) {
+            $q->whereBetween('bimbingan.tanggal', [$tanggal_awal_bimbingan, $tanggal_akhir_bimbingan]);
+        })
+        ->orderBy('bimbingan.tanggal','desc')
+        ->get();
+}
 
-    ->get();
-
-    }
 
   // =====================
 // MODE: REKAP PELANGGARAN
 // =====================
 $rekap_pelanggaran = collect();
 if ($mode == 'rekappelanggaran' && $kelas && $jurusan && $tahunAjar) {
-
-$rekap_pelanggaran = DB::table('pelanggaran')
-    ->join('siswa','siswa.NIS','=','pelanggaran.NIS')
-    ->join('jenispelanggaran','jenispelanggaran.id_jenispelanggaran','=','pelanggaran.id_jenispelanggaran')
-    ->select(
-        'pelanggaran.tanggal',
-        'siswa.nama_siswa',
-        'jenispelanggaran.nama_pelanggaran as nama_pelanggaran',
-        'pelanggaran.notes'
-    )
-    ->where('siswa.kelas_siswa',$kelas)
-    ->where('siswa.jurusan_siswa',$jurusan)
-    ->where('pelanggaran.tahunAjar',$tahunAjar)
-    ->when($tanggal_pelanggaran, fn($q)=>$q->whereDate('pelanggaran.tanggal',$tanggal_pelanggaran))
-    ->orderBy('pelanggaran.tanggal','desc')
-    ->get();
-
-
-
+    $rekap_pelanggaran = DB::table('pelanggaran')
+        ->join('siswa','siswa.NIS','=','pelanggaran.NIS')
+        ->join('jenispelanggaran','jenispelanggaran.id_jenispelanggaran','=','pelanggaran.id_jenispelanggaran')
+        ->select('pelanggaran.tanggal','siswa.nama_siswa','jenispelanggaran.nama_pelanggaran','pelanggaran.notes')
+        ->where('siswa.kelas_siswa',$kelas)
+        ->where('siswa.jurusan_siswa',$jurusan)
+        ->where('pelanggaran.tahunAjar',$tahunAjar)
+        ->when($tanggal_awal_pelanggaran && $tanggal_akhir_pelanggaran, function($q) use ($tanggal_awal_pelanggaran, $tanggal_akhir_pelanggaran) {
+            $q->whereBetween('pelanggaran.tanggal', [$tanggal_awal_pelanggaran, $tanggal_akhir_pelanggaran]);
+        })
+        ->orderBy('pelanggaran.tanggal','desc')
+        ->get();
 }
+
 
 
 $rekap = $rekapAbsensi;
 
 return view('bimbingan', compact(
-    'kelas','jurusan','tahunAjar','tanggal','mode',
-    'tanggal_riwayat','tanggal_pelanggaran',
+    'kelas','jurusan','tahunAjar','mode',
     'daftar_kelas','daftar_jurusan','daftar_tahunAjar',
-    'siswa','riwayat','rekap','rekap_pelanggaran'
+    'siswa','riwayat','rekap','rekap_pelanggaran',
+    'tanggal_awal','tanggal_akhir',
+    'tanggal_awal_bimbingan','tanggal_akhir_bimbingan',
+    'tanggal_awal_pelanggaran','tanggal_akhir_pelanggaran'
 ));
+
 
 
 }

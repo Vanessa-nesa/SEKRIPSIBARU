@@ -1,0 +1,30 @@
+body { 
+    background-color: #f8f9fa; 
+}
+
+/* Styling tabel */
+.table th, 
+.table td { 
+    vertical-align: middle; 
+}
+
+/* Branding navbar */
+.navbar-brand { 
+    font-weight: 600; 
+}
+
+/* Tombol kembali */
+.btn-kembali {
+    background-color: #343a40;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.btn-kembali:hover {
+    background-color: #23272b;
+    color: #fff;
+}
+
+/* Responsiveness (opsional jika ingin tambahkan styling lain) */

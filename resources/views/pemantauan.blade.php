@@ -1,47 +1,80 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <!-- Mengatur charset dan tampilan responsif -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Judul halaman -->
   <title>Pemantauan Sekolah</title>
 
+  <!-- Import Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Import Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-  <!-- CSS Terpisah -->
+  <!-- CSS eksternal untuk styling tambahan -->
   <link href="{{ asset('css/pemantauan.css') }}" rel="stylesheet">
 </head>
 <body>
 
-  <!-- 🔹 Navbar -->
-  <nav class="navbar navbar-dark bg-dark shadow-sm">
+<!-- ============================================================
+     NAVBAR
+     Menampilkan judul aplikasi, nama user, dan tombol logout
+============================================================ -->
+<nav class="navbar navbar-dark bg-dark shadow-sm">
     <div class="container-fluid d-flex justify-content-between align-items-center px-4">
-      <a class="navbar-brand fw-bold" href="#">Pemantauan Sekolah</a>
 
-      <div class="d-flex align-items-center gap-3">
-        <span class="text-light fw-semibold">{{ $namaUser }}</span>
+        <!-- Bagian kiri navbar: judul dan nama user -->
+        <div class="d-flex align-items-center gap-3">
 
-        <!-- 🔹 Tombol Logout -->
-        <form action="{{ route('logout') }}" method="GET">
-          <button class="btn btn-outline-light btn-sm">
-            <i class="bi bi-box-arrow-right"></i> Logout
-          </button>
-        </form>
-      </div>
+            <!-- Judul aplikasi -->
+            <a class="navbar-brand fw-bold mb-0" href="#">Pemantauan Sekolah</a>
+
+            <!-- Nama user dari session -->
+            <span class="text-light fw-semibold">|
+              {{ session('nama') ?? 'User' }}
+            </span>
+        </div>
+
+        <!-- Bagian kanan navbar: tombol logout -->
+        <li class="nav-item ms-3 d-flex align-items-center">
+
+            <!-- Tombol logout yang memunculkan konfirmasi -->
+            <button type="button" id="logoutBtn" class="btn btn-outline-light btn-sm">
+                Logout
+            </button>
+
+            <!-- Form logout tersembunyi yang dikirim lewat JavaScript -->
+            <form id="logoutForm" method="GET" action="{{ route('logout') }}" style="display: none;"></form>
+        </li>
+
     </div>
-  </nav>
+</nav>
 
-  <div class="container mt-4">
-    <h3 class="text-center fw-bold mb-4">Rekap Data Sekolah</h3>
+<!-- ============================================================
+     KONTEN UTAMA
+     berisi judul dan semua rekap laporan sekolah
+============================================================ -->
+<div class="container mt-4">
 
-    <!-- 🔹 Filter -->
+    <!-- Judul besar halaman -->
+    <h3 class="text-center fw-bold mb-4">Laporan Data Sekolah</h3>
+
+    <!-- ========================================================
+         FORM FILTER
+         Memilih kelas, jurusan, dan tahun ajar untuk menampilkan data
+    ========================================================= -->
     <form method="GET" action="{{ route('pemantauan.index') }}" class="row g-3 justify-content-center mb-4">
 
-      <!-- Kelas -->
+      <!-- Dropdown kelas -->
       <div class="col-md-3">
         <label class="form-label fw-semibold">Kelas</label>
         <select name="kelas" class="form-select" required>
           <option value="">Pilih Kelas</option>
+
+          <!-- Loop daftar kelas dari controller -->
           @foreach($daftar_kelas as $k)
             <option value="{{ $k }}" {{ ($kelas ?? '') == $k ? 'selected' : '' }}>
               {{ $k }}
@@ -50,11 +83,12 @@
         </select>
       </div>
 
-      <!-- Jurusan -->
+      <!-- Dropdown jurusan -->
       <div class="col-md-3">
         <label class="form-label fw-semibold">Jurusan</label>
         <select name="jurusan" class="form-select" required>
           <option value="">Pilih Jurusan</option>
+
           @foreach($daftar_jurusan as $j)
             <option value="{{ $j }}" {{ ($jurusan ?? '') == $j ? 'selected' : '' }}>
               {{ $j }}
@@ -63,11 +97,12 @@
         </select>
       </div>
 
-      <!-- Tahun Ajar -->
+      <!-- Dropdown tahun ajar -->
       <div class="col-md-3">
         <label class="form-label fw-semibold">Tahun Ajar</label>
         <select name="tahunAjar" class="form-select" required>
           <option value="">Pilih Tahun Ajar</option>
+
           @foreach($daftar_tahunAjar as $t)
             <option value="{{ $t }}" {{ ($tahunAjar ?? '') == $t ? 'selected' : '' }}>
               {{ $t }}
@@ -76,6 +111,7 @@
         </select>
       </div>
 
+      <!-- Tombol tampilkan data -->
       <div class="col-md-2 d-flex align-items-end">
         <button type="submit" class="btn btn-primary w-100">
           <i class="bi bi-funnel"></i> Tampilkan
@@ -83,45 +119,57 @@
       </div>
     </form>
 
-    <!-- =============================
-         REKAP BIMBINGAN
-    =============================== -->
+    <!-- ============================================================
+         LAPORAN BIMBINGAN KONSELING
+============================================================ -->
     <div class="mb-4 border rounded">
       <div class="section-title bg-info">
-        Rekap Bimbingan Konseling
+        Laporan Bimbingan Konseling
       </div>
+
       <div class="p-3">
+
+        <!-- Cek apakah ada data -->
         @if($bimbingan->count() > 0)
+
+          <!-- Tabel bimbingan -->
           <table class="table table-sm table-bordered">
             <thead class="table-info text-center">
               <tr><th>Nama</th><th>Keterangan</th></tr>
             </thead>
             <tbody>
+
+              <!-- Loop data bimbingan -->
               @foreach($bimbingan as $b)
                 <tr>
                   <td>{{ $b->nama_siswa }}</td>
                   <td>{{ $b->keterangan ?? '-' }}</td>
                 </tr>
               @endforeach
+
             </tbody>
           </table>
+
+        <!-- Jika data kosong -->
         @else
           <div class="alert alert-warning mb-0">Belum ada data bimbingan.</div>
         @endif
       </div>
     </div>
 
-   <!-- =============================
-     REKAP ABSENSI
-=============================== -->
+<!-- ============================================================
+     LAPORAN ABSENSI
+============================================================ -->
 <div class="mb-4 border rounded">
-  
-  <!-- 🔹 HEADER WARNA (FULL WIDTH) -->
+
+  <!-- Header dengan warna -->
   <div class="section-title bg-warning text-dark">
-      Rekap Absensi
+      Laporan Absensi
   </div>
 
   <div class="p-3">
+
+      <!-- Tabel rekap absensi -->
       <table class="table table-bordered table-absensi">
           <thead>
               <tr>
@@ -135,18 +183,23 @@
                   <th>Aksi</th>
               </tr>
           </thead>
+
           <tbody>
+
+              <!-- Loop data absensi -->
               @foreach($absensi as $a)
               <tr>
                   <td>{{ $a->kelas_siswa }}</td>
                   <td>{{ $a->jurusan_siswa }}</td>
                   <td>{{ $a->total }}</td>
 
+                  <!-- Menampilkan total sesuai jenis status -->
                   <td class="text-success fw-bold">{{ $a->hadir }}</td>
                   <td class="text-warning fw-bold">{{ $a->sakit }}</td>
                   <td class="text-primary fw-bold">{{ $a->izin }}</td>
                   <td class="text-danger fw-bold">{{ $a->alpa }}</td>
 
+                  <!-- Tombol detail -->
                   <td>
                       <a href="{{ route('pemantauan.absensi.detail', ['kelas'=>$kelas,'jurusan'=>$jurusan,'tahunAjar'=>$tahunAjar]) }}"
                           class="btn btn-dark btn-sm">
@@ -155,20 +208,21 @@
                   </td>
               </tr>
               @endforeach
+
           </tbody>
       </table>
   </div>
 
 </div>
 
-
-    <!-- =============================
-         REKAP PELANGGARAN
-    =============================== -->
+<!-- ============================================================
+     LAPORAN PELANGGARAN
+============================================================ -->
     <div class="mb-4 border rounded">
       <div class="section-title bg-danger">
-        Rekap Pelanggaran
+        Laporan Pelanggaran
       </div>
+
       <div class="p-3">
         @if($pelanggaran->count() > 0)
           <table class="table table-bordered align-middle">
@@ -197,12 +251,12 @@
       </div>
     </div>
 
-    <!-- =============================
-         REKAP PRESTASI (NEW)
-    =============================== -->
+<!-- ============================================================
+     LAPORAN PRESTASI
+============================================================ -->
     <div class="mb-4 border rounded">
       <div class="section-title bg-success">
-        Rekap Prestasi
+        Laporan Prestasi
       </div>
 
       <div class="p-3">
@@ -221,6 +275,8 @@
           </thead>
 
           <tbody>
+
+            <!-- Loop data prestasi -->
             @foreach($prestasi as $pr)
             <tr>
               <td>{{ $pr->nama_siswa }}</td>
@@ -232,15 +288,29 @@
               <td>{{ $pr->keterangan ?? '-' }}</td>
             </tr>
             @endforeach
+
           </tbody>
         </table>
+
         @else
         <div class="alert alert-warning mb-0">Belum ada data prestasi.</div>
         @endif
       </div>
     </div>
 
-  </div>
+</div>
+
+<!-- ============================================================
+     SCRIPT LOGOUT
+     Menampilkan pop-up browser lalu submit form logout
+============================================================ -->
+<script>
+document.getElementById('logoutBtn').addEventListener('click', function () {
+    if (confirm("Yakin ingin logout?")) {
+        document.getElementById('logoutForm').submit();
+    }
+});
+</script>
 
 </body>
 </html>

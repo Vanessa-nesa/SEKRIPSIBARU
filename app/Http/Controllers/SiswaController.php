@@ -93,4 +93,38 @@ class SiswaController extends Controller
         $kelas = Kelas::all();
         return view('siswa_edit', compact('siswa', 'kelas'));
     }
+    // =====================================================
+// 🔽 DOWNLOAD FORMAT EXCEL UNTUK IMPORT DATA SISWA
+// =====================================================
+public function downloadFormat()
+{
+    $filename = "Format_Import_Siswa.xlsx";
+
+    $header = ["NIS", "NAMA"];
+
+    // Buat spreadsheet baru
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+
+    // Isi header
+    $col = 'A';
+    foreach ($header as $h) {
+        $sheet->setCellValue($col . '1', $h);
+        $col++;
+    }
+
+    // AUTO WIDEN kolom
+    foreach (range('A', 'B') as $columnID) {
+        $sheet->getColumnDimension($columnID)->setAutoSize(true);
+    }
+
+    // Simpan file ke storage sementara
+    $tempFile = tempnam(sys_get_temp_dir(), 'excel');
+    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+    $writer->save($tempFile);
+
+    // Download file dan hapus setelah dikirim
+    return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
+}
+
 }

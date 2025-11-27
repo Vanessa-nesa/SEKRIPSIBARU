@@ -39,7 +39,7 @@ class PemantauanController extends Controller
             ->pluck('tahunAjar');
 
         // 🔹 Ambil nama user dari session
-        $namaUser = session('nama') ?? 'Pengguna';
+        $namaUser = session('nama');
 
         // 🔹 Siapkan variabel kosong
         $absensi = collect();

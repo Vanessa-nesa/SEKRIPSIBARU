@@ -1,0 +1,75 @@
+/* ===============================
+   Background umum
+================================ */
+body {
+    background-color: #f8f9fa;
+    padding-top: 70px !important;
+}
+
+
+/* ===============================
+   Wrapper tombol kembali
+================================ */
+.kembali-wrapper {
+    margin-top: 50px !important; 
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 5;
+}
+
+
+/* ===============================
+   Tombol Kembali – FULL HITAM
+================================ */
+.btn-kembali,
+.btn.btn-kembali {
+    background-color: #000 !important;       /* hitam pekat */
+    color: #fff !important;                  /* teks putih */
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 12px 28px !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    box-shadow: none !important;             /* hapus shadow putih */
+    transition: 0.2s;
+}
+
+/* Ikon putih */
+.btn-kembali i {
+    color: #fff !important;
+    font-size: 1.2rem;
+}
+
+/* Hover efek */
+.btn-kembali:hover,
+.btn.btn-kembali:hover {
+    background-color: #1a1a1a !important;
+    color: #fff !important;
+}
+
+
+/* ===============================
+   Table styling
+================================ */
+.table th,
+.table td {
+    vertical-align: middle !important;
+}
+
+.table-dark th {
+    background-color: #212529 !important;
+}
+
+
+/* ===============================
+   Responsiveness
+================================ */
+@media (max-width: 576px) {
+    .btn-kembali {
+        width: 100%;
+        justify-content: center;
+    }
+}

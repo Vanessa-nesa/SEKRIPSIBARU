@@ -95,45 +95,49 @@ class PelanggaranController extends Controller
      * 🔹 Rekap pelanggaran (Guru BK, Kepala, Wakil)
      */
     public function rekap(Request $request)
-    {
-        if (!in_array(session('role'), ['Guru BK', 'Kepala Sekolah', 'Wakil Kepala Sekolah'])) {
-            return redirect()->route('login')->with('error', 'Akses ditolak!');
-        }
-
-        $tanggal = $request->get('tanggal');
-        $kelas = $request->get('kelas');
-        $jurusan = $request->get('jurusan');
-        $tahunAjar = $request->get('tahunAjar');
-
-        $rekap = collect();
-
-        if ($tanggal && $kelas && $jurusan && $tahunAjar) {
-            $rekap = Pelanggaran::with(['siswa', 'jenis.kategori'])
-                ->whereDate('tanggal', $tanggal)
-                ->where('tahunAjar', $tahunAjar)
-                ->whereHas('siswa', function ($query) use ($kelas, $jurusan) {
-                    $query->where('kelas_siswa', $kelas)
-                          ->where('jurusan_siswa', $jurusan);
-                })
-                ->orderBy('tanggal', 'desc')
-                ->get();
-        }
-
-        // 🔹 Tahun ajaran diambil dari tabel kelas juga
-        $daftar_tahunAjar = Kelas::select('tahunAjar')->distinct()->orderBy('tahunAjar', 'desc')->pluck('tahunAjar');
-        $daftar_kelas = Kelas::orderBy('nama_kelas')->get();
-
-        return view('rekappelanggaran', compact(
-            'rekap',
-            'tanggal',
-            'kelas',
-            'jurusan',
-            'tahunAjar',
-            'daftar_kelas',
-            'daftar_tahunAjar'
-        ));
+{
+    if (!in_array(session('role'), ['Guru BK', 'Kepala Sekolah', 'Wakil Kepala Sekolah'])) {
+        return redirect()->route('login')->with('error', 'Akses ditolak!');
     }
-    // ✏️ Form Edit Pelanggaran
+
+    $tanggal_awal = $request->get('tanggal_awal');
+    $tanggal_akhir = $request->get('tanggal_akhir');
+    $kelas = $request->get('kelas');
+    $jurusan = $request->get('jurusan');
+    $tahunAjar = $request->get('tahunAjar');
+
+    $rekap = collect();
+
+    // ⚠️ Hanya jalankan query kalau filter lengkap
+    if ($tanggal_awal && $tanggal_akhir && $kelas && $jurusan && $tahunAjar) {
+        $rekap = Pelanggaran::with(['siswa', 'jenis.kategori'])
+            ->whereBetween('tanggal', [$tanggal_awal, $tanggal_akhir])
+            ->where('tahunAjar', $tahunAjar)
+            ->whereHas('siswa', function ($query) use ($kelas, $jurusan) {
+                $query->where('kelas_siswa', $kelas)
+                      ->where('jurusan_siswa', $jurusan);
+            })
+            ->orderBy('tanggal', 'desc')
+            ->get();
+    }
+
+    // Tahun ajaran dan kelas
+    $daftar_tahunAjar = Kelas::select('tahunAjar')->distinct()->orderBy('tahunAjar', 'desc')->pluck('tahunAjar');
+    $daftar_kelas = Kelas::orderBy('nama_kelas')->get();
+
+    return view('rekappelanggaran', compact(
+        'rekap',
+        'tanggal_awal',
+        'tanggal_akhir',
+        'kelas',
+        'jurusan',
+        'tahunAjar',
+        'daftar_kelas',
+        'daftar_tahunAjar'
+    ));
+}
+
+    // Form Edit Pelanggaran
 public function edit($id)
 {
     $pelanggaran = Pelanggaran::with(['siswa', 'jenis.kategori'])->findOrFail($id);
@@ -167,7 +171,7 @@ public function destroy($id)
     $pelanggaran = Pelanggaran::findOrFail($id);
     $pelanggaran->delete();
 
-    return back()->with('success', '🗑️ Data pelanggaran berhasil dihapus.');
+    return back()->with('success', 'Data pelanggaran berhasil dihapus.');
 }
 
 }

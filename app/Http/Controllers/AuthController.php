@@ -62,7 +62,6 @@ class AuthController extends Controller
                         ->with('success', 'Login berhasil!');
             }
         }
-
         // Jika login gagal
         return back()->with('error', 'Username atau password salah!');
     }

@@ -119,10 +119,6 @@ Route::delete('/gurubk/rekap-bimbingan/delete/{id}', [BimbinganController::class
 Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
 Route::post('/absensi', [AbsensiController::class, 'store'])->name('absensi.store');
 
-// 🟡 Rekap absensi (versi admin)
-Route::get('/absensi/rekap', [RekapAbsensiController::class, 'index'])->name('absensi.rekap');
-Route::post('/absensi/rekap/update', [RekapAbsensiController::class, 'update'])->name('absensi.update');
-Route::get('/rekapabsensi', [RekapAbsensiController::class, 'index'])->name('rekapabsensi');
 
 /*
 |--------------------------------------------------------------------------
@@ -263,4 +259,6 @@ Route::get('/pemantauan/absensi/detail',
 )->name('pemantauan.absensi.detail');
 
 
+Route::get('/siswa/download-format', [SiswaController::class, 'downloadFormat'])
+     ->name('siswa.format');
 

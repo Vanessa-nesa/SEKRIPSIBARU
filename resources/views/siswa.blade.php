@@ -15,7 +15,7 @@
     <div class="container-fluid d-flex align-items-center">
       <!-- Judul Panel -->
       <div class="d-flex align-items-center">
-        <a class="navbar-brand fw-bold" href="#">Import Data Siswa Panel tes</a>
+        <a class="navbar-brand fw-bold" href="#">Import Data Siswa Panel</a>
         <span>| {{ session('nama') ?? 'Admin' }}</span>
       </div>
 
@@ -89,6 +89,14 @@
           </div>
         </div>
       </div>
+
+      <!-- Download Format Excel -->
+<div class="mb-4">
+  <a href="{{ route('siswa.format') }}" class="btn btn-success">
+    <i class="bi bi-download"></i> Download Format Excel
+  </a>
+</div>
+
 
       <!-- Upload Excel -->
       <div class="input-group mb-4">

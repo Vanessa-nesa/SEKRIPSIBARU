@@ -1,107 +1,129 @@
-/* 🌈 Tampilan Umum */
+/* =========================================================
+   BACKGROUND & LAYOUT
+========================================================= */
 body {
-  background-color: #f8f9fa;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding-top: 80px; /* Memberi jarak dari navbar fixed-top */
+    background-color: #f8f9fa;
 }
 
-/* 🧭 Navbar (Dark Version) */
-.navbar {
-  background-color: #212529 !important; /* warna gelap */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-.navbar-brand {
-  font-weight: 700;
-  color: #ffffff !important;
-  font-size: 1.1rem;
-}
-
-.nav-link {
-  color: #bfbfbf !important; /* abu-abu default */
-  font-weight: 500;
-  transition: color 0.3s ease;
-  padding: 8px 14px;
-  border-bottom: none !important;
-  text-decoration: none !important;
-}
-
-.nav-link:hover {
-  color: #ffffff !important; /* putih saat hover */
-}
-
-.nav-link.active,
-.nav-link.fw-bold.text-white {
-  color: #ffffff !important; /* putih untuk aktif */
-  font-weight: 600;
-  border-bottom: none !important;
-}
-
-/* Tombol Logout */
-.btn-outline-light {
-  color: #fff;
-  border-color: #fff;
-}
-
-.btn-outline-light:hover {
-  background-color: #fff;
-  color: #212529;
-}
-
-/* 📦 Card & Table */
-.card {
-  border-radius: 10px;
-  border: none;
-}
-
-.table th, .table td {
-  vertical-align: middle;
-}
-
-/* 🧾 Tombol */
-.btn-primary {
-  background-color: #0d6efd;
-  border: none;
-  transition: background-color 0.3s ease;
-}
-
-.btn-primary:hover {
-  background-color: #0b5ed7;
-}
-
-/* 📱 Responsif */
-@media (max-width: 768px) {
-  .navbar-brand span {
-    display: none; /* Hanya tampilkan ikon di layar kecil */
-  }
-
-  .nav-link {
-    text-align: center;
-    border-bottom: none !important;
-  }
-
-  .navbar-nav {
-    background-color: #212529;
-    border-radius: 0 0 10px 10px;
-    padding: 10px;
-  }
-
-  .btn-outline-light {
-    width: 100%;
-  }
-}
-
-/* 🔙 Tombol Kembali */
+/* =========================================================
+   BUTTON KEMBALI
+========================================================= */
 .btn-kembali {
-    background-color: #343a40 !important; /* warna abu gelap */
-    color: #fff !important;
+    background-color: #343a40;
+    color: #fff;
     padding: 8px 16px;
     border-radius: 8px;
-    font-weight: 500;
     transition: 0.2s;
 }
 
 .btn-kembali:hover {
-    background-color: #23272b !important; /* lebih gelap saat hover */
+    background-color: #23272b;
+    color: #fff;
+}
+
+/* =========================================================
+   PREVIEW FILE (GAMBAR & PDF)
+========================================================= */
+.preview-container img {
+    max-width: 180px;
+    border-radius: 10px;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+}
+
+.preview-container iframe {
+    width: 100%;
+    height: 300px;
+    border: 1px solid #ccc;
+    margin-top: 10px;
+}
+
+/* =========================================================
+   TABLE STYLING (Kategori, Jenis, Rekap)
+========================================================= */
+.table {
+    background-color: #ffffff;
+}
+
+.table thead {
+    background-color: #e9ecef !important;
+}
+
+.table-bordered td,
+.table-bordered th {
+    border: 1px solid #dee2e6;
+}
+
+/* Khusus tombol lihat bukti pada rekap */
+.table td a.btn-outline-primary {
+    padding: 3px 10px;
+    font-size: 13px;
+}
+
+/* =========================================================
+   MODAL EDIT
+========================================================= */
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* =========================================================
+   FORM FILTER LAPORAN PRESTASI
+========================================================= */
+.rekap-filter label {
+    font-weight: 600;
+}
+
+.rekap-filter .form-select,
+.rekap-filter input[type="date"] {
+    border-radius: 6px;
+}
+
+/* =========================================================
+   SWEETALERT DELETE BUTTON STYLE
+========================================================= */
+.swal2-popup {
+    border-radius: 12px !important;
+}
+
+.swal2-confirm {
+    background-color: #d33 !important;
+}
+
+.swal2-cancel {
+    background-color: #6c757d !important;
     color: #fff !important;
 }
 
+/* =========================================================
+   RESPONSIVE FIX
+========================================================= */
+@media (max-width: 576px) {
+    .btn-kembali {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .rekap-filter .col-md-3,
+    .rekap-filter .col-md-2 {
+        margin-bottom: 10px;
+    }
+}
+
+/* =========================================================
+   PERBAIKAN JARAK TOMBOL KEMBALI DARI NAVBAR
+========================================================= */
+.kembali-wrapper {
+    margin-top: 120px !important; 
+    position: relative;
+    z-index: 10; /* Agar tidak tertutup navbar atau elemen lain */
+}
+
+
+.kembali-wrapper a {
+    position: relative;
+    z-index: 20;
+}
